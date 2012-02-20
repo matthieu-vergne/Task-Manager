@@ -2,16 +2,14 @@ package fr.vergne.taskmanager;
 
 import java.util.Date;
 
-public class Task {
-	private String title;
-	private String description;
-	private Date creationDate;
-	private Date deadline;
-	private TaskStatus status;
+import fr.vergne.taskmanager.history.AbstractHistorizable;
 
-	public static enum TaskStatus {
-		SLEEPING, RUNNING, FINISHED
-	}
+public class Task {
+	private AbstractHistorizable<String> title;
+	private AbstractHistorizable<String> description;
+	private Date creationDate;
+	private AbstractHistorizable<Date> deadline;
+	private AbstractHistorizable<TaskStatus> status;
 
 	public Task(String title, String description, boolean started, Date deadline) {
 		setTitle(title);
@@ -46,39 +44,39 @@ public class Task {
 	}
 
 	public String getTitle() {
-		return title;
+		return title.get();
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
+		this.title.set(title);
 	}
 
 	public String getDescription() {
-		return description;
+		return description.get();
 	}
 
 	public void setDescription(String decription) {
-		this.description = decription;
+		this.description.set(decription);
 	}
 
 	public Date getDeadline() {
-		return deadline;
+		return deadline.get();
 	}
 
 	public void setDeadline(Date deadline) {
-		this.deadline = deadline;
+		this.deadline.set(deadline);
 	}
 
 	public boolean isStarted() {
-		return status != TaskStatus.SLEEPING;
+		return getStatus() != TaskStatus.SLEEPING;
 	}
 
 	public boolean isRunning() {
-		return status == TaskStatus.RUNNING;
+		return getStatus() == TaskStatus.RUNNING;
 	}
 
 	public boolean isDone() {
-		return status == TaskStatus.FINISHED;
+		return getStatus() == TaskStatus.FINISHED;
 	}
 
 	public Date getCreationDate() {
@@ -90,11 +88,11 @@ public class Task {
 	}
 
 	public TaskStatus getStatus() {
-		return status;
+		return status.get();
 	}
 
 	public void setStatus(TaskStatus status) {
-		this.status = status;
+		this.status.set(status);
 	}
 
 	public boolean hasDeadline() {
