@@ -51,56 +51,58 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 		return history.iterator();
 	}
 
+	public Iterator<HistoryEntry<T>> reversedIterator() {
+		return history.descendingIterator();
+	}
+
 	public Iterator<T> valuesIterator() {
-		return new Iterator<T>() {
-			private final Iterator<HistoryEntry<T>> iterator = iterator();
+		return new ValueIterator(iterator());
+	}
 
-			@Override
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			@Override
-			public T next() {
-				return iterator.next().getValue();
-			}
-
-			@Override
-			public void remove() {
-				iterator.remove();
-			}
-		};
+	public Iterator<T> reversedValuesIterator() {
+		return new ValueIterator(reversedIterator());
 	}
 
 	public Iterator<Date> datesIterator() {
-		return new Iterator<Date>() {
-			private final Iterator<HistoryEntry<T>> iterator = iterator();
+		return new DateIterator(iterator());
+	}
 
-			@Override
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			@Override
-			public Date next() {
-				return iterator.next().getDate();
-			}
-
-			@Override
-			public void remove() {
-				iterator.remove();
-			}
-		};
+	public Iterator<Date> reversedDatesIterator() {
+		return new DateIterator(reversedIterator());
 	}
 
 	public void clear() {
 		history.clear();
 	}
-	
+
+	public void clearBefore(Date limit) {
+		Iterator<Date> iterator = datesIterator();
+		while (iterator.hasNext()) {
+			Date date = iterator.next();
+			if (date.before(limit)) {
+				iterator.remove();
+			} else {
+				break;
+			}
+		}
+	}
+
+	public void clearAfter(Date limit) {
+		Iterator<Date> iterator = reversedDatesIterator();
+		while (iterator.hasNext()) {
+			Date date = iterator.next();
+			if (date.after(limit)) {
+				iterator.remove();
+			} else {
+				break;
+			}
+		}
+	}
+
 	public boolean isEmpty() {
 		return history.isEmpty();
 	}
-	
+
 	public int size() {
 		return history.size();
 	}
@@ -123,5 +125,51 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 			return date;
 		}
 
+	}
+
+	public class ValueIterator implements Iterator<T> {
+		private final Iterator<HistoryEntry<T>> iterator;
+
+		public ValueIterator(Iterator<HistoryEntry<T>> historyIterator) {
+			this.iterator = historyIterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+
+		@Override
+		public T next() {
+			return iterator.next().getValue();
+		}
+
+		@Override
+		public void remove() {
+			iterator.remove();
+		}
+	}
+
+	public class DateIterator implements Iterator<Date> {
+		private final Iterator<HistoryEntry<T>> iterator;
+
+		public DateIterator(Iterator<HistoryEntry<T>> historyIterator) {
+			this.iterator = historyIterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+
+		@Override
+		public Date next() {
+			return iterator.next().getDate();
+		}
+
+		@Override
+		public void remove() {
+			iterator.remove();
+		}
 	}
 }

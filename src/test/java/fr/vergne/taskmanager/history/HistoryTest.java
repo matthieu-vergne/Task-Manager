@@ -138,6 +138,36 @@ public class HistoryTest {
 	}
 
 	@Test
+	public void testReversedHistoryIterator() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		history.push(0, new Date(5));
+		history.push(-5, new Date(10));
+
+		Iterator<HistoryEntry<Integer>> iterator = history.reversedIterator();
+		assertTrue(iterator.hasNext());
+		{
+			HistoryEntry<Integer> entry = iterator.next();
+			assertEquals(-5, (int) entry.getValue());
+			assertEquals(10, entry.getDate().getTime());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			HistoryEntry<Integer> entry = iterator.next();
+			assertEquals(0, (int) entry.getValue());
+			assertEquals(5, entry.getDate().getTime());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			HistoryEntry<Integer> entry = iterator.next();
+			assertEquals(1, (int) entry.getValue());
+			assertEquals(0, entry.getDate().getTime());
+			assertFalse(iterator.hasNext());
+		}
+	}
+
+	@Test
 	public void testValuesIterator() {
 		History<Integer> history = new History<Integer>();
 
@@ -157,6 +187,30 @@ public class HistoryTest {
 		}
 		{
 			assertEquals(-5, (int) iterator.next());
+			assertFalse(iterator.hasNext());
+		}
+	}
+
+	@Test
+	public void testReversedValuesIterator() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1);
+		history.push(0);
+		history.push(-5);
+
+		Iterator<Integer> iterator = history.reversedValuesIterator();
+		assertTrue(iterator.hasNext());
+		{
+			assertEquals(-5, (int) iterator.next());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			assertEquals(0, (int) iterator.next());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			assertEquals(1, (int) iterator.next());
 			assertFalse(iterator.hasNext());
 		}
 	}
@@ -186,6 +240,30 @@ public class HistoryTest {
 	}
 
 	@Test
+	public void testReversedDatesIterator() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(0, new Date(0));
+		history.push(0, new Date(5));
+		history.push(0, new Date(10));
+
+		Iterator<Date> iterator = history.reversedDatesIterator();
+		assertTrue(iterator.hasNext());
+		{
+			assertEquals(10, iterator.next().getTime());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			assertEquals(5, iterator.next().getTime());
+			assertTrue(iterator.hasNext());
+		}
+		{
+			assertEquals(0, iterator.next().getTime());
+			assertFalse(iterator.hasNext());
+		}
+	}
+
+	@Test
 	public void testClear() {
 		History<Integer> history = new History<Integer>();
 
@@ -196,6 +274,38 @@ public class HistoryTest {
 		assertEquals(3, history.size());
 		history.clear();
 		assertEquals(0, history.size());
+	}
+
+	@Test
+	public void testClearBefore() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		history.push(0, new Date(5));
+		history.push(-5, new Date(10));
+
+		history.clearBefore(new Date(5));
+		assertEquals(2, history.size());
+		assertEquals(0, (int) history.getHistorizedValues().get(0));
+		assertEquals(5, history.getHistorizedDates().get(0).getTime());
+		assertEquals(-5, (int) history.getHistorizedValues().get(1));
+		assertEquals(10, history.getHistorizedDates().get(1).getTime());
+	}
+
+	@Test
+	public void testClearAfter() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		history.push(0, new Date(5));
+		history.push(-5, new Date(10));
+
+		history.clearAfter(new Date(5));
+		assertEquals(2, history.size());
+		assertEquals(1, (int) history.getHistorizedValues().get(0));
+		assertEquals(0, history.getHistorizedDates().get(0).getTime());
+		assertEquals(0, (int) history.getHistorizedValues().get(1));
+		assertEquals(5, history.getHistorizedDates().get(1).getTime());
 	}
 
 	@Test
@@ -257,4 +367,5 @@ public class HistoryTest {
 		history.clear();
 		assertEquals(0, history.size());
 	}
+
 }
