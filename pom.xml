@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.vergne.taskmanager</groupId>
+	<artifactId>task-manager</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Task Manager</name>
+	<description>Personal task manager.</description>
+	<inceptionYear>2012</inceptionYear>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/Sazaju/Task-Manager/issues/</url>
+	</issueManagement>
+	
+	<licenses>
+		<license>
+			<name>BSD</name>
+			<url>http://www.freebsd.org/copyright/license.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	<developers>
+		<developer>
+			<name>Matthieu Vergne</name>
+			<email>matthieu.vergne@(nospam)gmail_DOT_com</email>
+			<url>https://github.com/Sazaju</url>
+		</developer>
+	</developers>
+	
+	<scm>
+		<connection>scm:git:git://github.com/Sazaju/Task-Manager.git</connection>
+		<developerConnection>scm:git:git@github.com:${github.username}/Task-Manager.git</developerConnection>
+		<url>https://github.com/Sazaju/Task-Manager</url>
+	</scm>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>fr.vergne.taskmanager.Gui</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
