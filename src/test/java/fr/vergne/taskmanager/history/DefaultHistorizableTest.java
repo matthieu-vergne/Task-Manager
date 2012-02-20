@@ -23,6 +23,22 @@ public class DefaultHistorizableTest extends HistorizableTest<Integer> {
 	}
 
 	@Test
+	public void testHistoryFilling() {
+		DefaultHistorizable<Integer> historizable = new DefaultHistorizable<Integer>();
+		historizable.set(5);
+		historizable.set(3);
+		historizable.set(-345);
+
+		assertEquals(3, historizable.getHistory().size());
+		assertEquals(5, (int) historizable.getHistory().getHistorizedValues()
+				.get(0));
+		assertEquals(3, (int) historizable.getHistory().getHistorizedValues()
+				.get(1));
+		assertEquals(-345, (int) historizable.getHistory()
+				.getHistorizedValues().get(2));
+	}
+
+	@Test
 	public void testNullManagement() {
 		DefaultHistorizable<Integer> historizable = new DefaultHistorizable<Integer>(
 				false);
