@@ -1,42 +1,27 @@
 package fr.vergne.taskmanager.task;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 
 import fr.vergne.taskmanager.history.DefaultHistorizable;
 
 public class Task {
-	private DefaultHistorizable<String> title;
-	private DefaultHistorizable<String> description;
+	private final DefaultHistorizable<String> title = new DefaultHistorizable<String>();
+	private final DefaultHistorizable<String> description = new DefaultHistorizable<String>();
 	private Date creationDate;
-	private DefaultHistorizable<Date> deadline;
-	private DefaultHistorizable<TaskStatus> status;
-
-	public Task(String title, String description, boolean started, Date deadline) {
-		setTitle(title);
-		setDescription(description);
-		setDeadline(deadline);
-		setStatus(TaskStatus.SLEEPING);
-		setCreationDate(new Date());
-	}
-
-	public Task(String title, boolean start, Date deadline) {
-		this(title, null, start, deadline);
-	}
-
-	public Task(String title, String description, Date deadline) {
-		this(title, description, false, deadline);
-	}
-
-	public Task(String title, Date deadline) {
-		this(title, false, deadline);
-	}
+	private final DefaultHistorizable<Date> deadline = new DefaultHistorizable<Date>(
+			null);
+	private final DefaultHistorizable<TaskStatus> status = new DefaultHistorizable<TaskStatus>(
+			TaskStatus.SLEEPING);
 
 	public Task(String title, String description) {
-		this(title, description, null);
+		setTitle(title);
+		setDescription(description);
 	}
 
 	public Task(String title) {
-		this(title, (Date) null);
+		this(title, null);
 	}
 
 	public Task() {
@@ -84,7 +69,32 @@ public class Task {
 	}
 
 	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
+		setCreationDate(creationDate, false);
+	}
+
+	public void setCreationDate(Date creationDate, boolean force) {
+		Date min = new Date(Long.MAX_VALUE);
+		if (!force) {
+			Collection<Date> firsts = new LinkedList<Date>();
+			firsts.add(title.getHistory().iterator().next().getDate());
+			firsts.add(description.getHistory().iterator().next().getDate());
+			firsts.add(deadline.getHistory().iterator().next().getDate());
+			firsts.add(status.getHistory().iterator().next().getDate());
+
+			for (Date date : firsts) {
+				if (min.after(date)) {
+					min = date;
+				}
+			}
+		}
+		if (creationDate.after(min) && !force) {
+			throw new IllegalArgumentException(
+					"A part of the history is before " + creationDate
+							+ ", you cannot set the creation date after " + min
+							+ ".");
+		} else {
+			this.creationDate = creationDate;
+		}
 	}
 
 	public TaskStatus getStatus() {
