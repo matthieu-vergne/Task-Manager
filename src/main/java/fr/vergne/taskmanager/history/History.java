@@ -96,6 +96,14 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 	public void clear() {
 		history.clear();
 	}
+	
+	public boolean isEmpty() {
+		return history.isEmpty();
+	}
+	
+	public int size() {
+		return history.size();
+	}
 
 	public static class HistoryEntry<T> {
 
