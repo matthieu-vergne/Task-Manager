@@ -1,4 +1,4 @@
-package fr.vergne.taskmanager.gantt;
+package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
 import java.awt.event.ComponentEvent;

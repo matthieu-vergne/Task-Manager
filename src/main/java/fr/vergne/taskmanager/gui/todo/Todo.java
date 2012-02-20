@@ -1,4 +1,4 @@
-package fr.vergne.taskmanager.todo;
+package fr.vergne.taskmanager.gui.todo;
 
 import java.awt.GridLayout;
 

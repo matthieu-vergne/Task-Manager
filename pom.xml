@@ -54,7 +54,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>fr.vergne.taskmanager.Gui</mainClass>
+							<mainClass>fr.vergne.taskmanager.gui.Gui</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

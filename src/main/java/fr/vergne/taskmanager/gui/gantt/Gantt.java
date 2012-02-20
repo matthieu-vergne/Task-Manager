@@ -1,4 +1,4 @@
-package fr.vergne.taskmanager.gantt;
+package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -11,7 +11,7 @@ import javax.swing.SpringLayout;
 
 import fr.vergne.taskmanager.Task;
 import fr.vergne.taskmanager.TaskList;
-import fr.vergne.taskmanager.gantt.TimeBar.UnitDescriptor;
+import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
