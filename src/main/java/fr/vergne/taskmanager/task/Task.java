@@ -73,28 +73,37 @@ public class Task {
 	}
 
 	public void setCreationDate(Date creationDate, boolean force) {
-		Date min = new Date(Long.MAX_VALUE);
-		if (!force) {
-			Collection<Date> firsts = new LinkedList<Date>();
-			firsts.add(title.getHistory().iterator().next().getDate());
-			firsts.add(description.getHistory().iterator().next().getDate());
-			firsts.add(deadline.getHistory().iterator().next().getDate());
-			firsts.add(status.getHistory().iterator().next().getDate());
+		Date max = lookForMaximalCreationDate(!force);
+		if (creationDate.after(max) && !force) {
+			throw new IllegalArgumentException(
+					"A part of the history is before " + creationDate
+							+ ", you cannot set the creation date after " + max
+							+ ".");
+		} else {
+			this.creationDate = creationDate;
+			
+			title.getHistory().clearBefore(creationDate);
+			description.getHistory().clearBefore(creationDate);
+			deadline.getHistory().clearBefore(creationDate);
+			status.getHistory().clearBefore(creationDate);
+		}
+	}
 
+	private Date lookForMaximalCreationDate(boolean considerHistory) {
+		Date min = new Date(Long.MAX_VALUE);
+		if (considerHistory) {
+			Collection<Date> firsts = new LinkedList<Date>();
+			firsts.add(title.getHistory().datesIterator().next());
+			firsts.add(description.getHistory().datesIterator().next());
+			firsts.add(deadline.getHistory().datesIterator().next());
+			firsts.add(status.getHistory().datesIterator().next());
 			for (Date date : firsts) {
-				if (min.after(date)) {
+				if (date.before(min)) {
 					min = date;
 				}
 			}
 		}
-		if (creationDate.after(min) && !force) {
-			throw new IllegalArgumentException(
-					"A part of the history is before " + creationDate
-							+ ", you cannot set the creation date after " + min
-							+ ".");
-		} else {
-			this.creationDate = creationDate;
-		}
+		return min;
 	}
 
 	public TaskStatus getStatus() {
