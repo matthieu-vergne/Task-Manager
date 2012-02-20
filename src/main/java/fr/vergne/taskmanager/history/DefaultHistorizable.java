@@ -4,6 +4,15 @@ public class DefaultHistorizable<T> implements Historizable<T> {
 
 	private final boolean isNullForbiden;
 
+	public DefaultHistorizable(T initialValue, boolean forbidNull) {
+		this(forbidNull);
+		set(initialValue);
+	}
+
+	public DefaultHistorizable(T initialValue) {
+		this(initialValue, false);
+	}
+
 	public DefaultHistorizable(boolean forbidNull) {
 		isNullForbiden = forbidNull;
 	}
