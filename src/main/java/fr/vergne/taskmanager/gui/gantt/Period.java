@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
-import fr.vergne.taskmanager.Task;
+import fr.vergne.taskmanager.task.Task;
 
 @SuppressWarnings("serial")
 public class Period extends JPanel {

@@ -21,7 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import fr.vergne.taskmanager.Task;
+import fr.vergne.taskmanager.task.Task;
 
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {

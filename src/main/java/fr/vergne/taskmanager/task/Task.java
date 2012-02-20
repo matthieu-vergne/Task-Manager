@@ -1,15 +1,15 @@
-package fr.vergne.taskmanager;
+package fr.vergne.taskmanager.task;
 
 import java.util.Date;
 
-import fr.vergne.taskmanager.history.AbstractHistorizable;
+import fr.vergne.taskmanager.history.DefaultHistorizable;
 
 public class Task {
-	private AbstractHistorizable<String> title;
-	private AbstractHistorizable<String> description;
+	private DefaultHistorizable<String> title;
+	private DefaultHistorizable<String> description;
 	private Date creationDate;
-	private AbstractHistorizable<Date> deadline;
-	private AbstractHistorizable<TaskStatus> status;
+	private DefaultHistorizable<Date> deadline;
+	private DefaultHistorizable<TaskStatus> status;
 
 	public Task(String title, String description, boolean started, Date deadline) {
 		setTitle(title);

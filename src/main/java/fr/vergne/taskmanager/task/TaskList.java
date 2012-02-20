@@ -1,4 +1,4 @@
-package fr.vergne.taskmanager;
+package fr.vergne.taskmanager.task;
 
 import java.util.Comparator;
 import java.util.LinkedList;

@@ -9,9 +9,9 @@ import java.util.Date;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
-import fr.vergne.taskmanager.Task;
-import fr.vergne.taskmanager.TaskList;
 import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
+import fr.vergne.taskmanager.task.Task;
+import fr.vergne.taskmanager.task.TaskList;
 
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {

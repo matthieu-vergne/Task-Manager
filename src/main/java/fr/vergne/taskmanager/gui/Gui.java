@@ -12,10 +12,10 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 
-import fr.vergne.taskmanager.Task;
-import fr.vergne.taskmanager.TaskList;
 import fr.vergne.taskmanager.gui.gantt.Gantt;
 import fr.vergne.taskmanager.gui.todo.Todo;
+import fr.vergne.taskmanager.task.Task;
+import fr.vergne.taskmanager.task.TaskList;
 
 @SuppressWarnings("serial")
 public class Gui extends JFrame {

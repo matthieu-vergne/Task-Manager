@@ -1,4 +1,4 @@
-package fr.vergne.taskmanager;
+package fr.vergne.taskmanager.task;
 
 public enum TaskStatus {
 	SLEEPING, RUNNING, FINISHED

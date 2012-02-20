@@ -6,8 +6,8 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import fr.vergne.taskmanager.Task;
-import fr.vergne.taskmanager.TaskList;
+import fr.vergne.taskmanager.task.Task;
+import fr.vergne.taskmanager.task.TaskList;
 
 @SuppressWarnings("serial")
 public class Todo extends JPanel {
