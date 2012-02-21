@@ -22,7 +22,7 @@ public class DefaultHistorizable<T> implements Historizable<T> {
 	}
 
 	public T get() {
-		return history.getCurrentValue();
+		return history.getYoungestValue();
 	}
 
 	public void set(T value) {
@@ -42,7 +42,7 @@ public class DefaultHistorizable<T> implements Historizable<T> {
 
 	@Override
 	public String toString() {
-		return history.getCurrentValue().toString();
+		return history.getYoungestValue().toString();
 	}
 
 	public boolean isNullForbiden() {

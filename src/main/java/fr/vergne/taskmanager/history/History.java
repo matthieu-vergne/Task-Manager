@@ -18,8 +18,12 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 		push(value, new Date());
 	}
 
-	public T getCurrentValue() {
+	public T getYoungestValue() {
 		return history.getLast().getValue();
+	}
+
+	public T getOldestValue() {
+		return history.getFirst().getValue();
 	}
 
 	public List<T> getHistorizedValues() {
@@ -38,11 +42,15 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 		return list;
 	}
 
-	public Date getLastUpdateDate() {
+	public Date getYoungestDate() {
 		return history.getLast().getDate();
 	}
 
-	public void forgetLastUpdate() {
+	public Date getOldestDate() {
+		return history.getFirst().getDate();
+	}
+
+	public void forgetLastValue() {
 		history.removeLast();
 	}
 

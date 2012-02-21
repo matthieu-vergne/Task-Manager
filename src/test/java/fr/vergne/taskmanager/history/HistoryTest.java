@@ -24,11 +24,11 @@ public class HistoryTest {
 		History<Integer> history = new History<Integer>();
 
 		history.push(1);
-		assertEquals(1, (int) history.getCurrentValue());
+		assertEquals(1, (int) history.getYoungestValue());
 		history.push(0);
-		assertEquals(0, (int) history.getCurrentValue());
+		assertEquals(0, (int) history.getYoungestValue());
 		history.push(-5);
-		assertEquals(-5, (int) history.getCurrentValue());
+		assertEquals(-5, (int) history.getYoungestValue());
 
 		assertEquals(3, history.size());
 		assertEquals(1, (int) history.getHistorizedValues().get(0));
@@ -41,14 +41,14 @@ public class HistoryTest {
 		History<Integer> history = new History<Integer>();
 
 		history.push(1, new Date(0));
-		assertEquals(1, (int) history.getCurrentValue());
-		assertEquals(0, history.getLastUpdateDate().getTime());
+		assertEquals(1, (int) history.getYoungestValue());
+		assertEquals(0, history.getYoungestDate().getTime());
 		history.push(0, new Date(5));
-		assertEquals(0, (int) history.getCurrentValue());
-		assertEquals(5, history.getLastUpdateDate().getTime());
+		assertEquals(0, (int) history.getYoungestValue());
+		assertEquals(5, history.getYoungestDate().getTime());
 		history.push(-5, new Date(10));
-		assertEquals(-5, (int) history.getCurrentValue());
-		assertEquals(10, history.getLastUpdateDate().getTime());
+		assertEquals(-5, (int) history.getYoungestValue());
+		assertEquals(10, history.getYoungestDate().getTime());
 
 		assertEquals(3, history.size());
 		assertEquals(1, (int) history.getHistorizedValues().get(0));
@@ -57,6 +57,66 @@ public class HistoryTest {
 		assertEquals(0, history.getHistorizedDates().get(0).getTime());
 		assertEquals(5, history.getHistorizedDates().get(1).getTime());
 		assertEquals(10, history.getHistorizedDates().get(2).getTime());
+	}
+
+	@Test
+	public void testYoungestValue() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		assertEquals(1, (int) history.getYoungestValue());
+		history.push(0, new Date(5));
+		assertEquals(0, (int) history.getYoungestValue());
+		history.push(-5, new Date(10));
+		assertEquals(-5, (int) history.getYoungestValue());
+		history.forgetLastValue();
+		assertEquals(0, (int) history.getYoungestValue());
+		history.push(4);
+		assertEquals(4, (int) history.getYoungestValue());
+	}
+
+	@Test
+	public void testOldestValue() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		assertEquals(1, (int) history.getOldestValue());
+		history.push(0, new Date(5));
+		assertEquals(1, (int) history.getOldestValue());
+		history.push(-5, new Date(10));
+		assertEquals(1, (int) history.getOldestValue());
+		history.clearBefore(new Date(5));
+		assertEquals(0, (int) history.getOldestValue());
+	}
+
+	@Test
+	public void testYoungestDate() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		assertEquals(0, history.getYoungestDate().getTime());
+		history.push(0, new Date(5));
+		assertEquals(5, history.getYoungestDate().getTime());
+		history.push(-5, new Date(10));
+		assertEquals(10, history.getYoungestDate().getTime());
+		history.forgetLastValue();
+		assertEquals(5, history.getYoungestDate().getTime());
+		history.push(4, new Date(15));
+		assertEquals(15, history.getYoungestDate().getTime());
+	}
+
+	@Test
+	public void testOldestDate() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		assertEquals(0, history.getOldestDate().getTime());
+		history.push(0, new Date(5));
+		assertEquals(0, history.getOldestDate().getTime());
+		history.push(-5, new Date(10));
+		assertEquals(0, history.getOldestDate().getTime());
+		history.clearBefore(new Date(5));
+		assertEquals(5, history.getOldestDate().getTime());
 	}
 
 	@Test
@@ -96,14 +156,14 @@ public class HistoryTest {
 		history.push(-5);
 
 		assertEquals(3, history.size());
-		assertEquals(-5, (int) history.getCurrentValue());
-		history.forgetLastUpdate();
+		assertEquals(-5, (int) history.getYoungestValue());
+		history.forgetLastValue();
 		assertEquals(2, history.size());
-		assertEquals(0, (int) history.getCurrentValue());
-		history.forgetLastUpdate();
+		assertEquals(0, (int) history.getYoungestValue());
+		history.forgetLastValue();
 		assertEquals(1, history.size());
-		assertEquals(1, (int) history.getCurrentValue());
-		history.forgetLastUpdate();
+		assertEquals(1, (int) history.getYoungestValue());
+		history.forgetLastValue();
 		assertEquals(0, history.size());
 	}
 
@@ -320,11 +380,11 @@ public class HistoryTest {
 		history.push(-5);
 		assertFalse(history.isEmpty());
 
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertFalse(history.isEmpty());
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertFalse(history.isEmpty());
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertTrue(history.isEmpty());
 
 		history.push(3);
@@ -350,11 +410,11 @@ public class HistoryTest {
 		history.push(-5);
 		assertEquals(3, history.size());
 
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertEquals(2, history.size());
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertEquals(1, history.size());
-		history.forgetLastUpdate();
+		history.forgetLastValue();
 		assertEquals(0, history.size());
 
 		history.push(3);
