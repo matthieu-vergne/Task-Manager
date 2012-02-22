@@ -17,6 +17,7 @@ import fr.vergne.taskmanager.gui.todo.Todo;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
+// TODO take care of updates when change tab
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
 
