@@ -46,68 +46,75 @@ public class Gui extends JFrame {
 		Todo todo = new Todo();
 		views.addTab("Todo", todo);
 
-		Gantt gantt = new Gantt();
+		final Gantt gantt = new Gantt();
 		views.addTab("Gantt", gantt);
-		Calendar calendar = Calendar.getInstance();
 
-		TaskList taskList = initTaskList(calendar);
+		final TaskList taskList = initTaskList();
 
 		gantt.applyTaskList(taskList);
 		gantt.resetDisplay();
-		
+
 		todo.applyTaskList(taskList);
 
 		views.addFocusListener(new FocusListener() {
-			
+
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				// do nothing
 			}
-			
+
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				Component component = views.getComponent(views.getSelectedIndex());
+				Component component = views.getComponent(views
+						.getSelectedIndex());
 				component.transferFocus();
 			}
 		});
 	}
 
-	private TaskList initTaskList(Calendar calendar) {
+	private TaskList initTaskList() {
+		Calendar calendar = Calendar.getInstance();
+
 		TaskList todoList = new TaskList();
-		Task task = new Task("Task 1");
-		task.setCreationDate(calendar.getTime());
+		Task task = new Task();
+		task.setCreationDate(calendar.getTime(), true);
 		calendar.add(Calendar.MINUTE, 5);
 		task.setDeadline(calendar.getTime());
 		calendar.add(Calendar.MINUTE, -4);
+		task.setTitle("Task 1");
 		todoList.add(task);
 
-		task = new Task("Task 2");
-		task.setCreationDate(calendar.getTime());
+		task = new Task();
+		task.setCreationDate(calendar.getTime(), true);
 		calendar.add(Calendar.MINUTE, 5);
 		task.setDeadline(calendar.getTime());
 		calendar.add(Calendar.MINUTE, -4);
+		task.setTitle("Task 2");
 		todoList.add(task);
 
-		task = new Task("Task 3");
-		task.setCreationDate(calendar.getTime());
+		task = new Task();
+		task.setCreationDate(calendar.getTime(), true);
 		calendar.add(Calendar.MINUTE, 5);
 		task.setDeadline(calendar.getTime());
 		calendar.add(Calendar.MINUTE, -4);
+		task.setTitle("Task 3");
 		todoList.add(task);
 
-		task = new Task("Task 4");
-		task.setCreationDate(calendar.getTime());
+		task = new Task();
+		task.setCreationDate(calendar.getTime(), true);
 		calendar.add(Calendar.MINUTE, 5);
 		task.setDeadline(calendar.getTime());
 		calendar.add(Calendar.MINUTE, -4);
+		task.setTitle("Task 4");
 		todoList.add(task);
 
-		task = new Task("Task 5");
-		task.setCreationDate(calendar.getTime());
+		task = new Task();
+		task.setCreationDate(calendar.getTime(), true);
 		calendar.add(Calendar.MINUTE, 5);
 		task.setDeadline(calendar.getTime());
 		calendar.add(Calendar.MINUTE, -4);
 		todoList.add(task);
+		task.setTitle("Task 5");
 		return todoList;
 	}
 

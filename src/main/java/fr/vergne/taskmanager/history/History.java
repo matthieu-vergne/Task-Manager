@@ -84,13 +84,19 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 	}
 
 	public void clearBefore(Date limit) {
-		Iterator<Date> iterator = datesIterator();
-		while (iterator.hasNext()) {
-			Date date = iterator.next();
-			if (date.before(limit)) {
-				iterator.remove();
-			} else {
-				break;
+		if (!history.isEmpty()) {
+			T lastValue = getYoungestValue();
+			Iterator<Date> iterator = datesIterator();
+			while (iterator.hasNext()) {
+				Date date = iterator.next();
+				if (date.before(limit)) {
+					iterator.remove();
+				} else {
+					break;
+				}
+			}
+			if (history.isEmpty()) {
+				push(lastValue, limit);
 			}
 		}
 	}

@@ -353,6 +353,20 @@ public class HistoryTest {
 	}
 
 	@Test
+	public void testClearBeforeAll() {
+		History<Integer> history = new History<Integer>();
+
+		history.push(1, new Date(0));
+		history.push(0, new Date(5));
+		history.push(-5, new Date(10));
+
+		history.clearBefore(new Date(15));
+		assertEquals(1, history.size());
+		assertEquals(-5, (int) history.getHistorizedValues().get(0));
+		assertEquals(15, history.getHistorizedDates().get(0).getTime());
+	}
+
+	@Test
 	public void testClearAfter() {
 		History<Integer> history = new History<Integer>();
 
