@@ -1,8 +1,7 @@
 package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.Graphics;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -21,28 +20,6 @@ public class PeriodCanvas extends JPanel {
 	public PeriodCanvas() {
 		setBackground(Color.WHITE);
 		setLayout(layout);
-		addComponentListener(new ComponentListener() {
-
-			@Override
-			public void componentShown(ComponentEvent arg0) {
-				updateDisplay();
-			}
-
-			@Override
-			public void componentResized(ComponentEvent arg0) {
-				updateDisplay();
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent arg0) {
-				// nothing to do
-			}
-
-			@Override
-			public void componentHidden(ComponentEvent arg0) {
-				// nothing to do
-			}
-		});
 	}
 
 	public Date getActualMinDate() {
@@ -67,7 +44,8 @@ public class PeriodCanvas extends JPanel {
 		return max;
 	}
 
-	public void updateDisplay() {
+	@Override
+	public void paint(Graphics arg0) {
 		long min = minDate.getTime();
 		long max = maxDate.getTime();
 		long delta = max - min;
@@ -93,7 +71,9 @@ public class PeriodCanvas extends JPanel {
 			}
 			lastPeriod = period;
 		}
-		revalidate();
+		invalidate();
+
+		super.paint(arg0);
 	}
 
 	public void addPeriod(Period period) {

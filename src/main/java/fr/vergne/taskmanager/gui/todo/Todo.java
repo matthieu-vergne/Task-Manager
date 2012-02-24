@@ -24,6 +24,7 @@ import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.task.TaskStatus;
 
+// TODO add feature to add and remove tasks
 @SuppressWarnings("serial")
 public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();

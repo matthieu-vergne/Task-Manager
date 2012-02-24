@@ -1,6 +1,7 @@
 package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Calendar;
@@ -13,11 +14,26 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
+// FIXME paint the cursor after the time slots of the time bars
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
 
 	private final TimeBar highTimeBar = new TimeBar();
-	private final TimeBar lowTimeBar = new TimeBar();
+	private final TimeBar lowTimeBar = new TimeBar() {
+		public void paint(Graphics arg0) {
+			super.paint(arg0);
+			
+			UnitDescriptor ref = lowTimeBar.getCurrentDescriptor();
+			long refValue = ref.getUnitMultiplicator() * ref.getUnitStep();
+			for (UnitDescriptor desc : highTimeBar.getDescriptors()) {
+				long descValue = desc.getUnitMultiplicator() * desc.getUnitStep();
+				if (descValue >= 3 * refValue) {
+					highTimeBar.setForcedDescriptor(desc);
+					break;
+				}
+			}
+		};
+	};
 	private final PeriodCanvas periodCanvas = new PeriodCanvas();
 	private final JPanel timeCursor = new JPanel();
 	private final SpringLayout layout = new SpringLayout();
@@ -70,6 +86,7 @@ public class Gantt extends JPanel {
 						e.printStackTrace();
 					}
 					updateCursor();
+					validate();
 				}
 			}
 		});
@@ -83,16 +100,16 @@ public class Gantt extends JPanel {
 		long max = periodCanvas.getMaxDate().getTime();
 		median = (max + min) / 2;
 		radius = median - min;
-		updateDisplay();
+		revalidate();
 	}
 
 	private void initComponents() {
 		initTimeBars();
 
-		add(timeCursor);
-		add(highTimeBar);
 		add(lowTimeBar);
+		add(highTimeBar);
 		add(periodCanvas);
+		add(timeCursor);
 		timeCursor.setBackground(Color.GREEN);
 
 		setLayout(layout);
@@ -123,7 +140,7 @@ public class Gantt extends JPanel {
 				SpringLayout.NORTH, this);
 		layout.putConstraint(SpringLayout.SOUTH, timeCursor, 0,
 				SpringLayout.SOUTH, this);
-		layout.putConstraint(SpringLayout.WIDTH, timeCursor, 1,
+		layout.putConstraint(SpringLayout.WIDTH, timeCursor, 2,
 				SpringLayout.WEST, this);
 	}
 
@@ -209,32 +226,25 @@ public class Gantt extends JPanel {
 		highTimeBar.addDescriptor(new UnitDescriptor(mult, 100, unit, format));
 	}
 
-	private void updateDisplay() {
+	@Override
+	public void paint(Graphics arg0) {
 		Date minDate = new Date(median - radius);
 		Date maxDate = new Date(median + radius);
 
 		lowTimeBar.setMinDate(minDate);
 		lowTimeBar.setMaxDate(maxDate);
-		lowTimeBar.updateDisplay();
+		lowTimeBar.invalidate();
 
 		highTimeBar.setMinDate(minDate);
 		highTimeBar.setMaxDate(maxDate);
-		UnitDescriptor ref = lowTimeBar.getCurrentDescriptor();
-		long refValue = ref.getUnitMultiplicator() * ref.getUnitStep();
-		for (UnitDescriptor desc : highTimeBar.getDescriptors()) {
-			long descValue = desc.getUnitMultiplicator() * desc.getUnitStep();
-			if (descValue >= 3 * refValue) {
-				highTimeBar.setForcedDescriptor(desc);
-				break;
-			}
-		}
-		highTimeBar.updateDisplay();
+		highTimeBar.invalidate();
 
 		periodCanvas.setMinDate(minDate);
 		periodCanvas.setMaxDate(maxDate);
-		periodCanvas.updateDisplay();
-		updateCursor();
-		revalidate();
+		periodCanvas.invalidate();
+		
+		super.paint(arg0);
+		timeCursor.repaint();
 	}
 
 	private void updateCursor() {
@@ -244,19 +254,19 @@ public class Gantt extends JPanel {
 		int x = (int) ((ref - min) * getWidth() / delta);
 		layout.putConstraint(SpringLayout.WEST, timeCursor, x,
 				SpringLayout.WEST, this);
-		revalidate();
+		timeCursor.invalidate();
 	}
 
 	public void zoom(double ratio) {
 		radius *= ratio;
 		radius = (long) Math.min(Math.max(radius, 1000), 50 * 365.25 * 24 * 60
 				* 60 * 1000);
-		updateDisplay();
+		repaint();
 	}
 
 	public void goTo(Date date) {
 		median = date.getTime();
-		updateDisplay();
+		repaint();
 	}
 
 	public void addPeriod(Period period) {

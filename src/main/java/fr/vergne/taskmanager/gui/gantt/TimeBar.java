@@ -2,10 +2,9 @@ package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.HierarchyBoundsListener;
-import java.awt.event.HierarchyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -25,7 +24,7 @@ import javax.swing.border.LineBorder;
 @SuppressWarnings("serial")
 public class TimeBar extends JPanel {
 	private Date minDate = new Date();
-	private Date maxDate = new Date();
+	private Date maxDate = new Date(minDate.getTime() + 3600000);
 	private final List<UnitDescriptor> descriptors = new LinkedList<UnitDescriptor>();
 	private UnitDescriptor forcedDescriptor = null;
 	private UnitDescriptor currentDescriptor = null;
@@ -33,19 +32,6 @@ public class TimeBar extends JPanel {
 	public TimeBar() {
 		setBorder(new LineBorder(Color.BLACK));
 		setPreferredSize(new Dimension(0, 20));
-
-		addHierarchyBoundsListener(new HierarchyBoundsListener() {
-
-			@Override
-			public void ancestorResized(HierarchyEvent arg0) {
-				updateDisplay();
-			}
-
-			@Override
-			public void ancestorMoved(HierarchyEvent arg0) {
-				// do nothing
-			}
-		});
 	}
 
 	public Date getMinDate() {
@@ -64,7 +50,8 @@ public class TimeBar extends JPanel {
 		this.maxDate = maxDate;
 	}
 
-	public void updateDisplay() {
+	@Override
+	public void paint(Graphics arg0) {
 		final int totalPixels = getWidth();
 		final long min = minDate.getTime();
 		final long max = maxDate.getTime();
@@ -83,7 +70,8 @@ public class TimeBar extends JPanel {
 			unitMultiplicator = currentDescriptor.getUnitMultiplicator();
 			unitStep = currentDescriptor.getUnitStep();
 			if (calendarUnit != currentDescriptor.getCalendarUnit()) {
-				calendar.set(calendarUnit, calendar.getActualMinimum(calendarUnit));
+				calendar.set(calendarUnit,
+						calendar.getActualMinimum(calendarUnit));
 				calendarUnit = currentDescriptor.getCalendarUnit();
 			} else {
 				int flooredValue = (int) (unitStep * Math
@@ -91,18 +79,18 @@ public class TimeBar extends JPanel {
 				calendar.set(calendarUnit, flooredValue);
 			}
 
-			// +1 to consider the last partial component
 			numberOfComponents = (long) Math.ceil((double) delta
-					/ unitMultiplicator / unitStep) + 1;
+					/ unitMultiplicator / unitStep);
 
 			String string = currentDescriptor.getDateFormat().replaceAll("'",
 					"");
 			maxComponents = totalPixels / string.length() / 8;
-			
+
 			if (currentDescriptor == forcedDescriptor) {
 				break;
 			}
-		} while (isDescriptorForced() || iterator.hasNext() && numberOfComponents > maxComponents);
+		} while (isDescriptorForced() || iterator.hasNext()
+				&& numberOfComponents > maxComponents);
 
 		SpringLayout lowLayout = new SpringLayout();
 		setLayout(lowLayout);
@@ -133,8 +121,9 @@ public class TimeBar extends JPanel {
 					currentDescriptor.getUnitStep());
 			previousSlot = slot;
 		}
+		invalidate();
 
-		revalidate();
+		super.paint(arg0);
 	}
 
 	public UnitDescriptor getForcedDescriptor() {
@@ -179,6 +168,11 @@ public class TimeBar extends JPanel {
 			add(new JLabel("|"), constraints);
 			constraints.weightx = 1;
 			add(new JLabel(text), constraints);
+		}
+
+		@Override
+		public void paint(Graphics arg0) {
+			super.paint(arg0);
 		}
 	}
 
