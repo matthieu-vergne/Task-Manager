@@ -2,6 +2,7 @@ package fr.vergne.taskmanager.gui.todo;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collection;
@@ -20,11 +21,11 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import fr.vergne.taskmanager.gui.TaskUpdateDialog;
+import fr.vergne.taskmanager.gui.gantt.UpdateListener;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.task.TaskStatus;
 
-// TODO add feature to add and remove tasks
 @SuppressWarnings("serial")
 public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();
@@ -79,7 +80,20 @@ public class Todo extends JPanel {
 		});
 	}
 
+	UpdateListener listener = new UpdateListener() {
+
+		@Override
+		public void update() {
+			table.repaint();
+		}
+	};
+
 	public void applyTaskList(TaskList list) {
+		TaskList old = model.getList();
+		if (old != null) {
+			old.removeUpdateListener(listener);
+		}
+		list.addUpdateListener(listener);
 		model.setList(list);
 		table.revalidate();
 	}
@@ -216,6 +230,19 @@ public class Todo extends JPanel {
 			}
 
 		});
+		menu.add(new AbstractAction("Remove") {
+
+			@Override
+			public boolean isEnabled() {
+				return !table.getSelectionModel().isSelectionEmpty();
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				removeSelection();
+			}
+
+		});
 	}
 
 	private void openUpdateDialogForSelection() {
@@ -226,5 +253,25 @@ public class Todo extends JPanel {
 			new TaskUpdateDialog(task).setVisible(true);
 			table.repaint();
 		}
+	}
+
+	private void removeSelection() {
+		ListSelectionModel selection = table.getSelectionModel();
+		if (!selection.isSelectionEmpty()) {
+			int index = selection.getMinSelectionIndex();
+			Task task = model.getTask(index);
+			model.getList().remove(task);
+			selection.clearSelection();
+		}
+	}
+
+	@Override
+	public synchronized void addKeyListener(KeyListener l) {
+		table.addKeyListener(l);
+	}
+
+	@Override
+	public synchronized KeyListener[] getKeyListeners() {
+		return table.getKeyListeners();
 	}
 }

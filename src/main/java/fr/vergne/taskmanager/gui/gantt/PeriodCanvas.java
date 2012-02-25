@@ -12,14 +12,12 @@ import javax.swing.SpringLayout;
 @SuppressWarnings("serial")
 public class PeriodCanvas extends JPanel {
 
-	private final SpringLayout layout = new SpringLayout();
 	private final Collection<Period> periods = new LinkedList<Period>();
 	private Date minDate = new Date();
 	private Date maxDate = new Date(minDate.getTime() + 3600000);
 
 	public PeriodCanvas() {
 		setBackground(Color.WHITE);
-		setLayout(layout);
 	}
 
 	public Date getActualMinDate() {
@@ -37,7 +35,7 @@ public class PeriodCanvas extends JPanel {
 		Date max = new Date(0);
 		for (Period period : periods) {
 			Date stop = period.getStop();
-			if (stop.after(max)) {
+			if (stop != null && stop.after(max)) {
 				max = stop;
 			}
 		}
@@ -51,25 +49,32 @@ public class PeriodCanvas extends JPanel {
 		long delta = max - min;
 
 		Period lastPeriod = null;
+		SpringLayout layout = new SpringLayout();
+		setLayout(layout);
 		for (Period period : periods) {
-			long start = period.getStart().getTime();
-			int pixelStart = (int) ((start - min) * getWidth() / delta);
-			layout.putConstraint(SpringLayout.WEST, period, pixelStart,
-					SpringLayout.WEST, this);
+			if (period.isBoundedPeriod()) {
+				long start = period.getStart().getTime();
+				int pixelStart = (int) ((start - min) * getWidth() / delta);
+				layout.putConstraint(SpringLayout.WEST, period, pixelStart,
+						SpringLayout.WEST, this);
 
-			long stop = period.getStop().getTime();
-			int pixelStop = (int) ((max - stop) * getWidth() / delta);
-			layout.putConstraint(SpringLayout.EAST, period, -pixelStop,
-					SpringLayout.EAST, this);
+				long stop = period.getStop().getTime();
+				int pixelStop = (int) ((max - stop) * getWidth() / delta);
+				layout.putConstraint(SpringLayout.EAST, period, -pixelStop,
+						SpringLayout.EAST, this);
 
-			if (lastPeriod == null) {
-				layout.putConstraint(SpringLayout.NORTH, period, 5,
-						SpringLayout.NORTH, this);
+				if (lastPeriod == null) {
+					layout.putConstraint(SpringLayout.NORTH, period, 5,
+							SpringLayout.NORTH, this);
+				} else {
+					layout.putConstraint(SpringLayout.NORTH, period, 5,
+							SpringLayout.SOUTH, lastPeriod);
+				}
+				lastPeriod = period;
 			} else {
-				layout.putConstraint(SpringLayout.NORTH, period, 5,
-						SpringLayout.SOUTH, lastPeriod);
+				layout.putConstraint(SpringLayout.SOUTH, period, 0,
+						SpringLayout.NORTH, this);
 			}
-			lastPeriod = period;
 		}
 		invalidate();
 

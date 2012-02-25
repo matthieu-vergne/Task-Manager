@@ -20,8 +20,14 @@ public abstract class History<T> implements Iterable<History.HistoryEntry<T>>,
 
 	private final Deque<HistoryEntry<T>> history = new LinkedList<HistoryEntry<T>>();
 
-	public void push(T value, Date date) {
-		history.add(new HistoryEntry<T>(date, value));
+	protected void push(T value, Date date) {
+		if (history.isEmpty() || getYoungestValue() != null
+				&& !getYoungestValue().equals(value)
+				|| getYoungestValue() == null && value != null) {
+			history.add(new HistoryEntry<T>(date, value));
+		} else {
+			// do not insert double
+		}
 	}
 
 	public void push(T value) {

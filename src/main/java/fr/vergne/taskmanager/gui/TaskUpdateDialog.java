@@ -3,6 +3,7 @@ package fr.vergne.taskmanager.gui;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
@@ -14,6 +15,7 @@ import java.util.GregorianCalendar;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
@@ -28,10 +30,11 @@ import fr.vergne.taskmanager.task.TaskStatus;
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
+	public boolean validated = false;
 	private final Task task;
 	private final JTextField titleEntry = new JTextField();
 	private final JDateField creationEntry = new JDateField();
-	private final JDateField deadlineEntry = new JDateField();
+	private final JDateField deadlineEntry = new JDateField(true);
 	private final JComboBox statusEntry = new JComboBox();
 
 	public TaskUpdateDialog(Task task) {
@@ -143,6 +146,7 @@ public class TaskUpdateDialog extends JDialog {
 		task.setCreationDate((Date) creationEntry.getDate());
 		task.setDeadline((Date) deadlineEntry.getDate());
 		task.setStatus((TaskStatus) statusEntry.getSelectedItem());
+		validated = true;
 		dispose();
 	}
 
@@ -177,16 +181,32 @@ public class TaskUpdateDialog extends JDialog {
 				new IntegerFormatter());
 		private final JFormattedTextField secondField = new JFormattedTextField(
 				new IntegerFormatter());
+		private final JCheckBox checkbox = new JCheckBox();
 		private final JFormattedTextField[] fields = new JFormattedTextField[] {
 				yearField, monthField, dayField, hourField, minuteField,
 				secondField };
+		private final boolean isFacultative;
 
-		public JDateField() {
+		public JDateField(boolean facultative) {
+			isFacultative = facultative;
 			initComponents();
 			initListeners();
 		}
 
+		public JDateField() {
+			this(false);
+		}
+
 		private void initListeners() {
+			checkbox.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					updateFields();
+				}
+
+			});
+
 			PropertyChangeListener valueListener = new PropertyChangeListener() {
 
 				@Override
@@ -284,18 +304,34 @@ public class TaskUpdateDialog extends JDialog {
 			hourField.setColumns(2);
 			minuteField.setColumns(2);
 			secondField.setColumns(2);
+
+			if (isFacultative) {
+				add(new JLabel("  "));
+				add(checkbox);
+			}
 		}
 
 		public Date getDate() {
-			return calendar.getTime();
+			return checkbox.isSelected() ? calendar.getTime() : null;
 		}
 
 		public void setDate(Date date) {
+			if (date != null) {
+				checkbox.setSelected(true);
+			} else {
+				checkbox.setSelected(false);
+				date = new Date();
+			}
 			calendar.setTime(date);
 			updateFields();
 		}
 
 		private void updateFields() {
+			boolean checked = checkbox.isSelected();
+			for (JFormattedTextField field : fields) {
+				field.setEnabled(checked);
+			}
+			
 			yearField.setValue(calendar.get(Calendar.YEAR));
 			monthField.setValue(calendar.get(Calendar.MONTH) + 1);
 			dayField.setValue(calendar.get(Calendar.DAY_OF_MONTH));

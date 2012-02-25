@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 import fr.vergne.taskmanager.export.Exportable;
+import fr.vergne.taskmanager.gui.gantt.UpdateListener;
 import fr.vergne.taskmanager.history.AbstractHistorizable;
 import fr.vergne.taskmanager.history.Historizable;
 import fr.vergne.taskmanager.history.HistorizableDate;
@@ -54,6 +55,7 @@ public class Task implements Exportable {
 
 	public void setTitle(String title) {
 		this.title.set(title);
+		fireUpdateEvent();
 	}
 
 	public String getDescription() {
@@ -62,6 +64,7 @@ public class Task implements Exportable {
 
 	public void setDescription(String decription) {
 		this.description.set(decription);
+		fireUpdateEvent();
 	}
 
 	public Date getDeadline() {
@@ -70,6 +73,7 @@ public class Task implements Exportable {
 
 	public void setDeadline(Date deadline) {
 		this.deadline.set(deadline);
+		fireUpdateEvent();
 	}
 
 	public boolean isStarted() {
@@ -107,6 +111,7 @@ public class Task implements Exportable {
 			deadline.getHistory().clearBefore(creationDate);
 			status.getHistory().clearBefore(creationDate);
 		}
+		fireUpdateEvent();
 	}
 
 	private Date lookForMaximalCreationDate(boolean considerHistory) {
@@ -135,6 +140,7 @@ public class Task implements Exportable {
 
 	public void setStatus(TaskStatus status) {
 		this.status.set(status);
+		fireUpdateEvent();
 	}
 
 	public boolean hasDeadline() {
@@ -191,5 +197,21 @@ public class Task implements Exportable {
 				.getNodeValue();
 		Date date = new Date(Long.parseLong(time));
 		setCreationDate(date);
+	}
+	
+	private final Collection<UpdateListener> updateListeners = new LinkedList<UpdateListener>();
+
+	public void addUpdateListener(UpdateListener listener) {
+		updateListeners.add(listener);
+	}
+
+	public void removeUpdateListener(UpdateListener listener) {
+		updateListeners.remove(listener);
+	}
+
+	protected void fireUpdateEvent() {
+		for (UpdateListener listener : updateListeners) {
+			listener.update();
+		}
 	}
 }

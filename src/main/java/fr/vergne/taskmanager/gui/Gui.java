@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -13,10 +15,12 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 
 import fr.vergne.taskmanager.gui.gantt.Gantt;
+import fr.vergne.taskmanager.gui.gantt.UpdateListener;
 import fr.vergne.taskmanager.gui.todo.Todo;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
@@ -25,9 +29,10 @@ import fr.vergne.taskmanager.xml.Exporter;
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
 
-	private final TaskList tasks = new TaskList();
 	private final File saveFile = new File("save.xml");
 	private final JTabbedPane views = new JTabbedPane();
+	private final TaskList tasks = initTaskList();
+	private boolean isListModified = false;
 
 	public static void main(String[] args) {
 		final Gui gui = new Gui();
@@ -42,6 +47,7 @@ public class Gui extends JFrame {
 	public Gui() {
 		initFrameProperties();
 		initComponents();
+		initListeners();
 		pack();
 	}
 
@@ -55,12 +61,52 @@ public class Gui extends JFrame {
 		final Gantt gantt = new Gantt();
 		views.addTab("Gantt", gantt);
 
-		final TaskList taskList = initTaskList();
-
-		gantt.applyTaskList(taskList);
+		gantt.applyTaskList(tasks);
 		gantt.resetDisplay();
 
-		todo.applyTaskList(taskList);
+		todo.applyTaskList(tasks);
+	}
+
+	private void initListeners() {
+		tasks.addUpdateListener(new UpdateListener() {
+
+			@Override
+			public void update() {
+				isListModified = true;
+				updateTitle();
+			}
+		});
+
+		for (final Component tab : views.getComponents()) {
+			tab.addKeyListener(new KeyListener() {
+				@Override
+				public void keyTyped(KeyEvent arg0) {
+					// do nothing
+				}
+
+				@Override
+				public void keyReleased(KeyEvent event) {
+					if (event.getKeyCode() == KeyEvent.VK_INSERT) {
+						Task task = new Task();
+						TaskUpdateDialog dialog = new TaskUpdateDialog(task);
+						dialog.setVisible(true);
+						if (dialog.validated) {
+							tasks.add(task);
+						}
+					} else if (event.getKeyCode() == KeyEvent.VK_S
+							&& event.isControlDown()) {
+						saveTasks(saveFile);
+					} else {
+						// do nothing
+					}
+				}
+
+				@Override
+				public void keyPressed(KeyEvent arg0) {
+					// do nothing
+				}
+			});
+		}
 
 		views.addFocusListener(new FocusListener() {
 
@@ -101,7 +147,18 @@ public class Gui extends JFrame {
 
 			@Override
 			public void windowClosing(WindowEvent arg0) {
-				saveTasks(saveFile);
+				if (isListModified) {
+					int answer = JOptionPane
+							.showConfirmDialog(
+									null,
+									"The tasks has been changed, save the current list?",
+									"Save modification", JOptionPane.OK_OPTION);
+					if (answer == 0) {
+						saveTasks(saveFile);
+					} else {
+						// do not save
+					}
+				}
 			}
 
 			@Override
@@ -119,6 +176,8 @@ public class Gui extends JFrame {
 	public void saveTasks(File file) {
 		Logger.getAnonymousLogger().info("Save tasks in " + file);
 		Exporter.write(tasks, file);
+		isListModified = false;
+		updateTitle();
 	}
 
 	public void loadTasks(File file) {
@@ -127,6 +186,7 @@ public class Gui extends JFrame {
 	}
 
 	private TaskList initTaskList() {
+		TaskList tasks = new TaskList();
 		if (saveFile.exists()) {
 			Exporter.read(tasks, saveFile);
 		} else {
@@ -177,10 +237,18 @@ public class Gui extends JFrame {
 
 	private void initFrameProperties() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setTitle("Task Manager");
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		screenSize.width /= 2;
 		screenSize.height /= 2;
 		setPreferredSize(screenSize);
+		updateTitle();
+	}
+
+	private void updateTitle() {
+		String title = "Task Manager";
+		if (isListModified) {
+			title += " *";
+		}
+		setTitle(title);
 	}
 }

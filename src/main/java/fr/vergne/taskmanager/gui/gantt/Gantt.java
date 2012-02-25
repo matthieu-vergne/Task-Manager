@@ -2,12 +2,15 @@ package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SpringLayout;
 
 import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
@@ -22,11 +25,12 @@ public class Gantt extends JPanel {
 	private final TimeBar lowTimeBar = new TimeBar() {
 		public void paint(Graphics arg0) {
 			super.paint(arg0);
-			
+
 			UnitDescriptor ref = lowTimeBar.getCurrentDescriptor();
 			long refValue = ref.getUnitMultiplicator() * ref.getUnitStep();
 			for (UnitDescriptor desc : highTimeBar.getDescriptors()) {
-				long descValue = desc.getUnitMultiplicator() * desc.getUnitStep();
+				long descValue = desc.getUnitMultiplicator()
+						* desc.getUnitStep();
 				if (descValue >= 3 * refValue) {
 					highTimeBar.setForcedDescriptor(desc);
 					break;
@@ -100,7 +104,7 @@ public class Gantt extends JPanel {
 		long max = periodCanvas.getMaxDate().getTime();
 		median = (max + min) / 2;
 		radius = median - min;
-		revalidate();
+		repaint();
 	}
 
 	private void initComponents() {
@@ -242,7 +246,7 @@ public class Gantt extends JPanel {
 		periodCanvas.setMinDate(minDate);
 		periodCanvas.setMaxDate(maxDate);
 		periodCanvas.invalidate();
-		
+
 		super.paint(arg0);
 		timeCursor.repaint();
 	}
@@ -273,11 +277,51 @@ public class Gantt extends JPanel {
 		periodCanvas.addPeriod(period);
 	}
 
+	UpdateListener listener = new UpdateListener() {
+
+		@Override
+		public void update() {
+			renewPeriods();
+			repaint();
+		}
+	};
+
+	private TaskList tasks;
+
 	public void applyTaskList(TaskList list) {
+		if (tasks != null) {
+			tasks.removeUpdateListener(listener);
+		}
+		tasks = list;
+
+		renewPeriods();
+		tasks.addUpdateListener(listener);
+	}
+
+	private void renewPeriods() {
 		periodCanvas.clear();
-		for (Task task : list) {
+		for (final Task task : tasks) {
 			if (task.hasDeadline()) {
-				periodCanvas.addPeriod(new Period(task));
+				final Period period = new Period(task);
+				JPopupMenu menu = new JPopupMenu();
+				menu.add(new AbstractAction("Edit...") {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						period.showUpdateDialog();
+					}
+
+				});
+				menu.add(new AbstractAction("Remove") {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						tasks.remove(task);
+					}
+
+				});
+				period.setComponentPopupMenu(menu);
+				periodCanvas.addPeriod(period);
 			}
 		}
 	}
