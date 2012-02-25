@@ -10,6 +10,19 @@ import org.junit.Test;
 import fr.vergne.taskmanager.history.History.HistoryEntry;
 
 public class HistoryTest {
+	class TestHistory extends History<Integer> {
+
+		@Override
+		public String dataToString(Integer data) {
+			return data.toString();
+		}
+
+		@Override
+		public Integer stringToData(String string) {
+			return Integer.parseInt(string);
+		}
+
+	}
 
 	@Test
 	public void testHistoryEntry() {
@@ -21,7 +34,7 @@ public class HistoryTest {
 
 	@Test
 	public void testSimplePush() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		assertEquals(1, (int) history.getYoungestValue());
@@ -38,7 +51,7 @@ public class HistoryTest {
 
 	@Test
 	public void testDatedPush() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		assertEquals(1, (int) history.getYoungestValue());
@@ -61,7 +74,7 @@ public class HistoryTest {
 
 	@Test
 	public void testYoungestValue() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		assertEquals(1, (int) history.getYoungestValue());
@@ -77,7 +90,7 @@ public class HistoryTest {
 
 	@Test
 	public void testOldestValue() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		assertEquals(1, (int) history.getOldestValue());
@@ -91,7 +104,7 @@ public class HistoryTest {
 
 	@Test
 	public void testYoungestDate() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		assertEquals(0, history.getYoungestDate().getTime());
@@ -107,7 +120,7 @@ public class HistoryTest {
 
 	@Test
 	public void testOldestDate() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		assertEquals(0, history.getOldestDate().getTime());
@@ -121,7 +134,7 @@ public class HistoryTest {
 
 	@Test
 	public void testHistorizedValues() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		history.push(0);
@@ -135,7 +148,7 @@ public class HistoryTest {
 
 	@Test
 	public void testHistorizedDates() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
 		history.push(0, new Date(5));
@@ -149,7 +162,7 @@ public class HistoryTest {
 
 	@Test
 	public void testForget() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		history.push(0);
@@ -169,7 +182,7 @@ public class HistoryTest {
 
 	@Test
 	public void testHistoryIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		history.push(0, new Date(5));
@@ -199,7 +212,7 @@ public class HistoryTest {
 
 	@Test
 	public void testReversedHistoryIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		history.push(0, new Date(5));
@@ -229,7 +242,7 @@ public class HistoryTest {
 
 	@Test
 	public void testValuesIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		history.push(0);
@@ -253,7 +266,7 @@ public class HistoryTest {
 
 	@Test
 	public void testReversedValuesIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		history.push(0);
@@ -277,7 +290,7 @@ public class HistoryTest {
 
 	@Test
 	public void testDatesIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
 		history.push(0, new Date(5));
@@ -301,7 +314,7 @@ public class HistoryTest {
 
 	@Test
 	public void testReversedDatesIterator() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
 		history.push(0, new Date(5));
@@ -325,7 +338,7 @@ public class HistoryTest {
 
 	@Test
 	public void testClear() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1);
 		history.push(0);
@@ -338,7 +351,7 @@ public class HistoryTest {
 
 	@Test
 	public void testClearBefore() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		history.push(0, new Date(5));
@@ -354,7 +367,7 @@ public class HistoryTest {
 
 	@Test
 	public void testClearBeforeAll() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		history.push(0, new Date(5));
@@ -368,7 +381,7 @@ public class HistoryTest {
 
 	@Test
 	public void testClearAfter() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		history.push(1, new Date(0));
 		history.push(0, new Date(5));
@@ -384,7 +397,7 @@ public class HistoryTest {
 
 	@Test
 	public void testIsEmpty() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		assertTrue(history.isEmpty());
 		history.push(1);
@@ -414,7 +427,7 @@ public class HistoryTest {
 
 	@Test
 	public void testSize() {
-		History<Integer> history = new History<Integer>();
+		History<Integer> history = new TestHistory();
 
 		assertEquals(0, history.size());
 		history.push(1);

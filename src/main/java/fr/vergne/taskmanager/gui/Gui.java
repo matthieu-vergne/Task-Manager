@@ -6,7 +6,11 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.File;
 import java.util.Calendar;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -16,12 +20,14 @@ import fr.vergne.taskmanager.gui.gantt.Gantt;
 import fr.vergne.taskmanager.gui.todo.Todo;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
+import fr.vergne.taskmanager.xml.Exporter;
 
-// TODO add persistency (save+load)
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
 
-	private JTabbedPane views;
+	private final TaskList tasks = new TaskList();
+	private final File saveFile = new File("save.xml");
+	private final JTabbedPane views = new JTabbedPane();
 
 	public static void main(String[] args) {
 		final Gui gui = new Gui();
@@ -41,7 +47,6 @@ public class Gui extends JFrame {
 
 	private void initComponents() {
 		setLayout(new GridLayout(1, 1));
-		views = new JTabbedPane();
 		add(views);
 
 		Todo todo = new Todo();
@@ -71,52 +76,109 @@ public class Gui extends JFrame {
 				component.transferFocus();
 			}
 		});
+		
+		addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowIconified(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				saveTasks(saveFile);
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+
+	public void saveTasks(File file) {
+		Logger.getAnonymousLogger().info("Save tasks in " + file);
+		Exporter.write(tasks, file);
+	}
+
+	public void loadTasks(File file) {
+		Logger.getAnonymousLogger().info("Load tasks from " + file);
+		Exporter.read(tasks, file);
 	}
 
 	private TaskList initTaskList() {
-		Calendar calendar = Calendar.getInstance();
+		if (saveFile.exists()) {
+			Exporter.read(tasks, saveFile);
+		} else {
+			Calendar calendar = Calendar.getInstance();
 
-		TaskList todoList = new TaskList();
-		Task task = new Task();
-		task.setCreationDate(calendar.getTime(), true);
-		calendar.add(Calendar.MINUTE, 5);
-		task.setDeadline(calendar.getTime());
-		calendar.add(Calendar.MINUTE, -4);
-		task.setTitle("Task 1");
-		todoList.add(task);
+			Task task = new Task();
+			task.setCreationDate(calendar.getTime(), true);
+			calendar.add(Calendar.MINUTE, 5);
+			task.setDeadline(calendar.getTime());
+			calendar.add(Calendar.MINUTE, -4);
+			task.setTitle("Task 1");
+			tasks.add(task);
 
-		task = new Task();
-		task.setCreationDate(calendar.getTime(), true);
-		calendar.add(Calendar.MINUTE, 5);
-		task.setDeadline(calendar.getTime());
-		calendar.add(Calendar.MINUTE, -4);
-		task.setTitle("Task 2");
-		todoList.add(task);
+			task = new Task();
+			task.setCreationDate(calendar.getTime(), true);
+			calendar.add(Calendar.MINUTE, 5);
+			task.setDeadline(calendar.getTime());
+			calendar.add(Calendar.MINUTE, -4);
+			task.setTitle("Task 2");
+			tasks.add(task);
 
-		task = new Task();
-		task.setCreationDate(calendar.getTime(), true);
-		calendar.add(Calendar.MINUTE, 5);
-		task.setDeadline(calendar.getTime());
-		calendar.add(Calendar.MINUTE, -4);
-		task.setTitle("Task 3");
-		todoList.add(task);
+			task = new Task();
+			task.setCreationDate(calendar.getTime(), true);
+			calendar.add(Calendar.MINUTE, 5);
+			task.setDeadline(calendar.getTime());
+			calendar.add(Calendar.MINUTE, -4);
+			task.setTitle("Task 3");
+			tasks.add(task);
 
-		task = new Task();
-		task.setCreationDate(calendar.getTime(), true);
-		calendar.add(Calendar.MINUTE, 5);
-		task.setDeadline(calendar.getTime());
-		calendar.add(Calendar.MINUTE, -4);
-		task.setTitle("Task 4");
-		todoList.add(task);
+			task = new Task();
+			task.setCreationDate(calendar.getTime(), true);
+			calendar.add(Calendar.MINUTE, 5);
+			task.setDeadline(calendar.getTime());
+			calendar.add(Calendar.MINUTE, -4);
+			task.setTitle("Task 4");
+			tasks.add(task);
 
-		task = new Task();
-		task.setCreationDate(calendar.getTime(), true);
-		calendar.add(Calendar.MINUTE, 5);
-		task.setDeadline(calendar.getTime());
-		calendar.add(Calendar.MINUTE, -4);
-		todoList.add(task);
-		task.setTitle("Task 5");
-		return todoList;
+			task = new Task();
+			task.setCreationDate(calendar.getTime(), true);
+			calendar.add(Calendar.MINUTE, 5);
+			task.setDeadline(calendar.getTime());
+			calendar.add(Calendar.MINUTE, -4);
+			tasks.add(task);
+			task.setTitle("Task 5");
+		}
+		return tasks;
 	}
 
 	private void initFrameProperties() {

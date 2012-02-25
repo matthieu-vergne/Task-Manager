@@ -1,23 +1,23 @@
 package fr.vergne.taskmanager.history;
 
-public class DefaultHistorizable<T> implements Historizable<T> {
+public abstract class AbstractHistorizable<T> implements Historizable<T> {
 
 	private final boolean isNullForbiden;
 
-	public DefaultHistorizable(T initialValue, boolean forbidNull) {
+	public AbstractHistorizable(T initialValue, boolean forbidNull) {
 		this(forbidNull);
 		set(initialValue);
 	}
 
-	public DefaultHistorizable(T initialValue) {
+	public AbstractHistorizable(T initialValue) {
 		this(initialValue, false);
 	}
 
-	public DefaultHistorizable(boolean forbidNull) {
+	public AbstractHistorizable(boolean forbidNull) {
 		isNullForbiden = forbidNull;
 	}
 
-	public DefaultHistorizable() {
+	public AbstractHistorizable() {
 		this(false);
 	}
 
@@ -33,7 +33,21 @@ public class DefaultHistorizable<T> implements Historizable<T> {
 		}
 	}
 
-	private final History<T> history = new History<T>();
+	private final History<T> history = new History<T>() {
+		@Override
+		public String dataToString(T data) {
+			return formatDataInString(data);
+		};
+
+		@Override
+		public T stringToData(String string) {
+			return formatStringInData(string);
+		}
+	};
+
+	public abstract String formatDataInString(T data);
+
+	public abstract T formatStringInData(String string);
 
 	@Override
 	public History<T> getHistory() {

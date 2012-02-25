@@ -6,7 +6,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class History<T> implements Iterable<History.HistoryEntry<T>> {
+import javax.xml.transform.sax.TransformerHandler;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
+
+import fr.vergne.taskmanager.export.Exportable;
+
+public abstract class History<T> implements Iterable<History.HistoryEntry<T>>,
+		Exportable {
 
 	private final Deque<HistoryEntry<T>> history = new LinkedList<HistoryEntry<T>>();
 
@@ -186,4 +196,49 @@ public class History<T> implements Iterable<History.HistoryEntry<T>> {
 			iterator.remove();
 		}
 	}
+
+	@Override
+	public void write(TransformerHandler handler) throws SAXException {
+		{
+			AttributesImpl attributes = new AttributesImpl();
+			handler.startElement("", "", "history", attributes);
+		}
+		for (HistoryEntry<T> data : this) {
+			{
+				AttributesImpl attributes = new AttributesImpl();
+				attributes.addAttribute("", "", "date", "CDATA", ""
+						+ data.getDate().getTime());
+				handler.startElement("", "", "value", attributes);
+			}
+			T value = data.getValue();
+			if (value != null) {
+				String string = dataToString(value);
+				handler.characters(string.toCharArray(), 0, string.length());
+			}
+			handler.endElement("", "", "value");
+		}
+		handler.endElement("", "", "history");
+	}
+
+	@Override
+	public void read(Node node) throws SAXException {
+		clear();
+		NodeList children = node.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+
+			String time = child.getAttributes().getNamedItem("date")
+					.getNodeValue();
+			Date date = new Date(Long.parseLong(time));
+
+			String string = child.getTextContent();
+			T value = string.isEmpty() ? null : stringToData(string);
+
+			push(value, date);
+		}
+	}
+
+	public abstract String dataToString(T data);
+
+	public abstract T stringToData(String string);
 }

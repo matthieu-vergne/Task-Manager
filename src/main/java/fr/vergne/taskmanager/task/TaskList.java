@@ -4,8 +4,16 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.transform.sax.TransformerHandler;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import fr.vergne.taskmanager.export.Exportable;
+
 @SuppressWarnings("serial")
-public class TaskList extends LinkedList<Task> {
+public class TaskList extends LinkedList<Task> implements Exportable {
 
 	public List<Task> getDoneTasks() {
 		List<Task> list = new LinkedList<Task>();
@@ -85,4 +93,24 @@ public class TaskList extends LinkedList<Task> {
 		};
 	}
 
+	@Override
+	public void write(TransformerHandler handler) throws SAXException {
+		handler.startElement("", "", "tasks", null);
+		for (Task task : this) {
+			task.write(handler);
+		}
+		handler.endElement("", "", "tasks");
+	}
+
+	@Override
+	public void read(Node node) throws SAXException {
+		clear();
+		NodeList children = node.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			Task task = new Task();
+			task.read(child);
+			add(task);
+		}
+	}
 }
