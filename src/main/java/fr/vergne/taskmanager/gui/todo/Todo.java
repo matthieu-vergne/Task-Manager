@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -33,7 +34,7 @@ public class Todo extends JPanel {
 
 	public Todo() {
 		setLayout(new GridLayout(1, 1));
-		add(table);
+		add(new JScrollPane(table));
 		table.getSelectionModel().setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
 

@@ -11,6 +11,7 @@ import java.util.Date;
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.SpringLayout;
 
 import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
@@ -39,6 +40,7 @@ public class Gantt extends JPanel {
 		};
 	};
 	private final PeriodCanvas periodCanvas = new PeriodCanvas();
+	private final JScrollPane periodPane = new JScrollPane(periodCanvas);
 	private final JPanel timeCursor = new JPanel();
 	private final SpringLayout layout = new SpringLayout();
 	private long median = new Date().getTime();
@@ -112,7 +114,9 @@ public class Gantt extends JPanel {
 
 		add(lowTimeBar);
 		add(highTimeBar);
-		add(periodCanvas);
+		add(periodPane);
+		periodPane
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		add(timeCursor);
 		timeCursor.setBackground(Color.GREEN);
 
@@ -131,13 +135,13 @@ public class Gantt extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
 				SpringLayout.EAST, this);
 
-		layout.putConstraint(SpringLayout.NORTH, periodCanvas, 0,
+		layout.putConstraint(SpringLayout.NORTH, periodPane, 0,
 				SpringLayout.SOUTH, lowTimeBar);
-		layout.putConstraint(SpringLayout.WEST, periodCanvas, 0,
+		layout.putConstraint(SpringLayout.WEST, periodPane, 0,
 				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.EAST, periodCanvas, 0,
+		layout.putConstraint(SpringLayout.EAST, periodPane, 0,
 				SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.SOUTH, periodCanvas, 0,
+		layout.putConstraint(SpringLayout.SOUTH, periodPane, 0,
 				SpringLayout.SOUTH, this);
 
 		layout.putConstraint(SpringLayout.NORTH, timeCursor, 0,

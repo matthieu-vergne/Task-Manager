@@ -76,6 +76,8 @@ public class PeriodCanvas extends JPanel {
 						SpringLayout.NORTH, this);
 			}
 		}
+		layout.putConstraint(SpringLayout.SOUTH, this, 0,
+				SpringLayout.SOUTH, lastPeriod);
 		invalidate();
 
 		super.paint(arg0);
