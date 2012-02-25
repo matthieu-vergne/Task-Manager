@@ -115,8 +115,6 @@ public class Gantt extends JPanel {
 		add(lowTimeBar);
 		add(highTimeBar);
 		add(periodPane);
-		periodPane
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		add(timeCursor);
 		timeCursor.setBackground(Color.GREEN);
 
