@@ -14,6 +14,7 @@ import java.util.GregorianCalendar;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFormattedTextField.AbstractFormatter;
@@ -22,14 +23,16 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import fr.vergne.taskmanager.task.Task;
+import fr.vergne.taskmanager.task.TaskStatus;
 
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
 	private final Task task;
 	private final JTextField titleEntry = new JTextField();
-	private final JDateField startEntry = new JDateField();
-	private final JDateField stopEntry = new JDateField();
+	private final JDateField creationEntry = new JDateField();
+	private final JDateField deadlineEntry = new JDateField();
+	private final JComboBox statusEntry = new JComboBox();
 
 	public TaskUpdateDialog(Task task) {
 		this.task = task;
@@ -42,34 +45,45 @@ public class TaskUpdateDialog extends JDialog {
 		initListeners();
 
 		titleEntry.setText(task.getTitle());
-		startEntry.setDate(task.getCreationDate());
-		stopEntry.setDate(task.getDeadline());
+		creationEntry.setDate(task.getCreationDate());
+		deadlineEntry.setDate(task.getDeadline());
+		statusEntry.setSelectedItem(task.getStatus());
 
 		setTitle(task.getTitle());
 		setModal(true);
 	}
 
 	private void initComponents() {
-		setLayout(new GridLayout(4, 2, 5, 5));
+		setLayout(new GridLayout(5, 2, 5, 5));
 		{
-			JLabel label = new JLabel("Name:");
+			JLabel label = new JLabel("Title:");
 			label.setLabelFor(titleEntry);
 			add(label);
 			add(titleEntry);
 		}
 
 		{
-			JLabel label = new JLabel("Start:");
+			JLabel label = new JLabel("Creation:");
 			label.setLabelFor(titleEntry);
 			add(label);
-			add(startEntry);
+			add(creationEntry);
 		}
 
 		{
-			JLabel label = new JLabel("Stop:");
-			label.setLabelFor(stopEntry);
+			JLabel label = new JLabel("Deadline:");
+			label.setLabelFor(deadlineEntry);
 			add(label);
-			add(stopEntry);
+			add(deadlineEntry);
+		}
+
+		{
+			JLabel label = new JLabel("Status:");
+			label.setLabelFor(statusEntry);
+			add(label);
+			add(statusEntry);
+			for (TaskStatus value : TaskStatus.values()) {
+				statusEntry.addItem(value);
+			}
 		}
 
 		{
@@ -119,14 +133,16 @@ public class TaskUpdateDialog extends JDialog {
 			}
 		};
 		titleEntry.addKeyListener(entryListener);
-		startEntry.addKeyListener(entryListener);
-		stopEntry.addKeyListener(entryListener);
+		creationEntry.addKeyListener(entryListener);
+		deadlineEntry.addKeyListener(entryListener);
+		statusEntry.addKeyListener(entryListener);
 	}
 
 	private void validateEntriesAndDispose() {
 		task.setTitle(titleEntry.getText());
-		task.setCreationDate((Date) startEntry.getDate());
-		task.setDeadline((Date) stopEntry.getDate());
+		task.setCreationDate((Date) creationEntry.getDate());
+		task.setDeadline((Date) deadlineEntry.getDate());
+		task.setStatus((TaskStatus) statusEntry.getSelectedItem());
 		dispose();
 	}
 
