@@ -31,8 +31,8 @@ public class Gui extends JFrame {
 
 	private final File saveFile = new File("save.xml");
 	private final JTabbedPane views = new JTabbedPane();
-	private final TaskList tasks = initTaskList();
 	private boolean isListModified = false;
+	private final TaskList tasks = initTaskList();
 
 	public static void main(String[] args) {
 		final Gui gui = Gui.getInstance();
@@ -237,6 +237,8 @@ public class Gui extends JFrame {
 			calendar.add(Calendar.MINUTE, -4);
 			tasks.add(task);
 			task.setTitle("Task 5");
+			
+			isListModified = true;
 		}
 		return tasks;
 	}
