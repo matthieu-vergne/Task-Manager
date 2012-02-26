@@ -27,6 +27,7 @@ import javax.swing.JTextField;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskStatus;
 
+// TODO replace multicomponent by monocomponent for date entries
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
