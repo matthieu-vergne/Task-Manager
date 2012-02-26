@@ -3,8 +3,11 @@ package fr.vergne.taskmanager.gui.gantt;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
@@ -12,7 +15,7 @@ import javax.swing.SpringLayout;
 @SuppressWarnings("serial")
 public class PeriodCanvas extends JPanel {
 
-	private final Collection<Period> periods = new LinkedList<Period>();
+	private final List<Period> periods = new LinkedList<Period>();
 	private Date minDate = new Date();
 	private Date maxDate = new Date(minDate.getTime() + 3600000);
 
@@ -128,5 +131,47 @@ public class PeriodCanvas extends JPanel {
 
 	public void setMaxDate(Date maxDate) {
 		this.maxDate = maxDate;
+	}
+
+	public void sortByStartDate() {
+		Collections.sort(periods, new Comparator<Period>() {
+			@Override
+			public int compare(Period p0, Period p1) {
+				Date d1 = p0.getStart();
+				Date d2 = p1.getStart();
+				if (d1 != null && d2 != null) {
+					return d1.compareTo(d2);
+				} else if (d1 != null) {
+					return 1;
+				} else if (d2 != null) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		periodUpdated = true;
+		repaint();
+	}
+
+	public void sortByStopDate() {
+		Collections.sort(periods, new Comparator<Period>() {
+			@Override
+			public int compare(Period p0, Period p1) {
+				Date d1 = p0.getStop();
+				Date d2 = p1.getStop();
+				if (d1 != null && d2 != null) {
+					return d1.compareTo(d2);
+				} else if (d1 != null) {
+					return 1;
+				} else if (d2 != null) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		periodUpdated = true;
+		repaint();
 	}
 }

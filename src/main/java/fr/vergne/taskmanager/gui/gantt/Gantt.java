@@ -1,6 +1,8 @@
 package fr.vergne.taskmanager.gui.gantt;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -9,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -18,7 +21,6 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
-// TODO sort the periods in different ways
 // TODO export to pictures
 // TODO add cursor looking for the position of the mouse
 // TODO display running parts regarding tasks history
@@ -44,6 +46,7 @@ public class Gantt extends JPanel {
 	};
 	private final PeriodCanvas periodCanvas = new PeriodCanvas();
 	private final JScrollPane periodPane = new JScrollPane(periodCanvas);
+	private final JPanel options = new JPanel();
 	private final JPanel timeCursor = new JPanel();
 	private final SpringLayout layout = new SpringLayout();
 	private long median = new Date().getTime();
@@ -52,8 +55,30 @@ public class Gantt extends JPanel {
 
 	public Gantt() {
 		initComponents();
+		initListeners();
 
-		addKeyListener(new KeyListener() {
+		final Gantt gantt = this;
+		cursorThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (gantt.isFocusable()) {
+					try {
+						Thread.sleep(Math.min(Math.max(radius / 1000, 100),
+								1000));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					updateCursor();
+					validate();
+				}
+			}
+		});
+		cursorThread.start();
+	}
+
+	private void initListeners() {
+		KeyListener keyListener = new KeyListener() {
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
@@ -81,26 +106,11 @@ public class Gantt extends JPanel {
 			public void keyPressed(KeyEvent arg0) {
 				// do nothing
 			}
-		});
-
-		final Gantt gantt = this;
-		cursorThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (gantt.isFocusable()) {
-					try {
-						Thread.sleep(Math.min(Math.max(radius / 1000, 100),
-								1000));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					updateCursor();
-					validate();
-				}
-			}
-		});
-		cursorThread.start();
+		};
+		addKeyListener(keyListener);
+		for (Component component : options.getComponents()) {
+			component.addKeyListener(keyListener);
+		}
 	}
 
 	public void resetDisplay() {
@@ -114,12 +124,29 @@ public class Gantt extends JPanel {
 	}
 
 	private void initComponents() {
+		options.setLayout(new FlowLayout());
+		options.add(new JButton(new AbstractAction("Start sort") {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				periodCanvas.sortByStartDate();
+			}
+		}));
+		options.add(new JButton(new AbstractAction("Stop sort") {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				periodCanvas.sortByStopDate();
+			}
+		}));
+
 		initTimeBars();
 
 		add(lowTimeBar);
 		add(highTimeBar);
 		add(periodPane);
 		add(timeCursor);
+		add(options);
 		timeCursor.setBackground(Color.GREEN);
 
 		setLayout(layout);
@@ -137,6 +164,13 @@ public class Gantt extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
 				SpringLayout.EAST, this);
 
+		layout.putConstraint(SpringLayout.SOUTH, options, 0,
+				SpringLayout.SOUTH, this);
+		layout.putConstraint(SpringLayout.WEST, lowTimeBar, 0,
+				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
+				SpringLayout.EAST, this);
+
 		layout.putConstraint(SpringLayout.NORTH, periodPane, 0,
 				SpringLayout.SOUTH, lowTimeBar);
 		layout.putConstraint(SpringLayout.WEST, periodPane, 0,
@@ -144,12 +178,12 @@ public class Gantt extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, periodPane, 0,
 				SpringLayout.EAST, this);
 		layout.putConstraint(SpringLayout.SOUTH, periodPane, 0,
-				SpringLayout.SOUTH, this);
+				SpringLayout.NORTH, options);
 
 		layout.putConstraint(SpringLayout.NORTH, timeCursor, 0,
 				SpringLayout.NORTH, this);
 		layout.putConstraint(SpringLayout.SOUTH, timeCursor, 0,
-				SpringLayout.SOUTH, this);
+				SpringLayout.SOUTH, periodPane);
 		layout.putConstraint(SpringLayout.WIDTH, timeCursor, 2,
 				SpringLayout.WEST, this);
 	}
