@@ -31,10 +31,11 @@ import fr.vergne.taskmanager.task.TaskStatus;
 public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();
 	private final JTable table = new JTable(model);
+	private final JScrollPane tablePane = new JScrollPane(table);
 
 	public Todo() {
 		setLayout(new GridLayout(1, 1));
-		add(new JScrollPane(table));
+		add(tablePane);
 		table.getSelectionModel().setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
 
@@ -85,7 +86,7 @@ public class Todo extends JPanel {
 
 		@Override
 		public void update() {
-			table.repaint();
+			table.revalidate();
 		}
 	};
 
