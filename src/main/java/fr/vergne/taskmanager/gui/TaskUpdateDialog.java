@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -311,14 +312,8 @@ public class TaskUpdateDialog extends JDialog {
 			boolean checked = checkbox.isSelected();
 			dateField.setEnabled(checked);
 
-			int year = calendar.get(Calendar.YEAR);
-			int month = calendar.get(Calendar.MONTH) + 1;
-			int day = calendar.get(Calendar.DAY_OF_MONTH);
-			int hour = calendar.get(Calendar.HOUR_OF_DAY);
-			int min = calendar.get(Calendar.MINUTE);
-			int sec = calendar.get(Calendar.SECOND);
-			dateField.setText(String.format("%04d-%02d-%02d %02d:%02d:%02d",
-					year, month, day, hour, min, sec));
+			dateField.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+			.format(calendar.getTime()));
 		}
 
 		@Override
