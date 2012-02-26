@@ -18,7 +18,10 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
-// FIXME paint the cursor after the time slots of the time bars
+// TODO sort the periods in different ways
+// TODO export to pictures
+// TODO add cursor looking for the position of the mouse
+// TODO display running parts regarding tasks history
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
 
