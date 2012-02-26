@@ -80,11 +80,12 @@ public class Gantt extends JPanel {
 			}
 		});
 
+		final Gantt gantt = this;
 		cursorThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				while (true) {
+				while (gantt.isFocusable()) {
 					try {
 						Thread.sleep(Math.min(Math.max(radius / 1000, 100),
 								1000));
@@ -250,6 +251,8 @@ public class Gantt extends JPanel {
 		periodCanvas.invalidate();
 
 		super.paint(arg0);
+
+		updateCursor();
 		timeCursor.repaint();
 	}
 
@@ -258,6 +261,7 @@ public class Gantt extends JPanel {
 		long ref = new Date().getTime();
 		long delta = lowTimeBar.getMaxDate().getTime() - min;
 		int x = (int) ((ref - min) * getWidth() / delta);
+		x = Math.min(Math.max(-timeCursor.getWidth(), x), getWidth());
 		layout.putConstraint(SpringLayout.WEST, timeCursor, x,
 				SpringLayout.WEST, this);
 		timeCursor.invalidate();

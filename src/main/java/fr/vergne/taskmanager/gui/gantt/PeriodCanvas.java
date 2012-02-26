@@ -18,6 +18,7 @@ public class PeriodCanvas extends JPanel {
 
 	public PeriodCanvas() {
 		setBackground(Color.WHITE);
+		setDoubleBuffered(true);
 	}
 
 	public Date getActualMinDate() {
@@ -42,15 +43,31 @@ public class PeriodCanvas extends JPanel {
 		return max;
 	}
 
+	private Date oldMinDate = null;
+	private Date oldMaxDate = null;
+	private boolean periodUpdated = false;
+
 	@Override
 	public void paint(Graphics arg0) {
-		long min = minDate.getTime();
-		long max = maxDate.getTime();
-		long delta = max - min;
+		if (!periodUpdated && minDate.equals(oldMinDate)
+				&& maxDate.equals(oldMaxDate)) {
+			// do not recompute the periods
+		} else {
+			computePeriods();
+			oldMinDate = minDate;
+			oldMaxDate = maxDate;
+			periodUpdated = false;
+		}
 
+		super.paint(arg0);
+	}
+
+	private void computePeriods() {
+		final long min = minDate.getTime();
+		final long max = maxDate.getTime();
+		final long delta = max - min;
 		Period lastPeriod = null;
 		SpringLayout layout = new SpringLayout();
-		setLayout(layout);
 		for (Period period : periods) {
 			if (period.isBoundedPeriod()) {
 				long start = period.getStart().getTime();
@@ -76,21 +93,21 @@ public class PeriodCanvas extends JPanel {
 						SpringLayout.NORTH, this);
 			}
 		}
-		layout.putConstraint(SpringLayout.SOUTH, this, 0,
-				SpringLayout.SOUTH, lastPeriod);
-		invalidate();
-
-		super.paint(arg0);
+		layout.putConstraint(SpringLayout.SOUTH, this, 0, SpringLayout.SOUTH,
+				lastPeriod);
+		setLayout(layout);
 	}
 
 	public void addPeriod(Period period) {
 		periods.add(period);
 		add(period);
+		periodUpdated = true;
 	}
 
 	public void clear() {
 		periods.clear();
 		removeAll();
+		periodUpdated = true;
 	}
 
 	public Collection<Period> getPeriods() {

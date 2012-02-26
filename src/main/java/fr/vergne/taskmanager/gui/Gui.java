@@ -35,7 +35,7 @@ public class Gui extends JFrame {
 	private boolean isListModified = false;
 
 	public static void main(String[] args) {
-		final Gui gui = new Gui();
+		final Gui gui = Gui.getInstance();
 		new Runnable() {
 			@Override
 			public void run() {
@@ -44,7 +44,13 @@ public class Gui extends JFrame {
 		}.run();
 	}
 
-	public Gui() {
+	private static final Gui instance = new Gui();
+
+	public static Gui getInstance() {
+		return instance;
+	}
+
+	private Gui() {
 		initFrameProperties();
 		initComponents();
 		initListeners();

@@ -13,8 +13,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,48 +52,26 @@ public class TimeBar extends JPanel {
 		this.maxDate = maxDate;
 	}
 
+	private Date oldMinDate = null;
+	private Date oldMaxDate = null;
+
 	@Override
 	public void paint(Graphics arg0) {
-		final int totalPixels = getWidth();
-		final long min = minDate.getTime();
-		final long max = maxDate.getTime();
-		final long delta = max - min;
-		int calendarUnit = Calendar.MILLISECOND;
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTime(minDate);
-		int unitStep = 1;
-		long unitMultiplicator = 1;
-		long numberOfComponents = 0;
-		long maxComponents = 0;
-		Iterator<UnitDescriptor> iterator = descriptors.iterator();
-		do {
-			currentDescriptor = iterator.next();
+		if (minDate.equals(oldMinDate) && maxDate.equals(oldMaxDate)) {
+			// do not recompute the slots
+		} else {
+			Set<Integer> unitsToReset = selectCurrentDescriptor();
+			Calendar calendar = computeRelativeReference(unitsToReset);
+			computeSlots(calendar);
+			invalidate();
+			oldMinDate = minDate;
+			oldMaxDate = maxDate;
+		}
 
-			unitMultiplicator = currentDescriptor.getUnitMultiplicator();
-			unitStep = currentDescriptor.getUnitStep();
-			if (calendarUnit != currentDescriptor.getCalendarUnit()) {
-				calendar.set(calendarUnit,
-						calendar.getActualMinimum(calendarUnit));
-				calendarUnit = currentDescriptor.getCalendarUnit();
-			} else {
-				int flooredValue = (int) (unitStep * Math
-						.floor((double) calendar.get(calendarUnit) / unitStep));
-				calendar.set(calendarUnit, flooredValue);
-			}
+		super.paint(arg0);
+	}
 
-			numberOfComponents = (long) Math.ceil((double) delta
-					/ unitMultiplicator / unitStep);
-
-			String string = currentDescriptor.getDateFormat().replaceAll("'",
-					"");
-			maxComponents = totalPixels / string.length() / 8;
-
-			if (currentDescriptor == forcedDescriptor) {
-				break;
-			}
-		} while (isDescriptorForced() || iterator.hasNext()
-				&& numberOfComponents > maxComponents);
-
+	private void computeSlots(Calendar calendar) {
 		SpringLayout lowLayout = new SpringLayout();
 		setLayout(lowLayout);
 		removeAll();
@@ -119,11 +99,56 @@ public class TimeBar extends JPanel {
 					* currentDescriptor.getUnitStep();
 			calendar.add(currentDescriptor.getCalendarUnit(),
 					currentDescriptor.getUnitStep());
+			slot.revalidate();
 			previousSlot = slot;
 		}
-		invalidate();
+	}
 
-		super.paint(arg0);
+	private Calendar computeRelativeReference(Set<Integer> calendarUnitsPassed) {
+		Calendar calendar = new GregorianCalendar();
+		{
+			calendar.setTime(minDate);
+			for (int unit : calendarUnitsPassed) {
+				calendar.set(unit, calendar.getActualMinimum(unit));
+			}
+			int unitStep = currentDescriptor.getUnitStep();
+			int unit = currentDescriptor.getCalendarUnit();
+			int flooredValue = (int) (unitStep * Math.floor((double) calendar
+					.get(unit) / unitStep));
+			calendar.set(unit, flooredValue);
+		}
+		return calendar;
+	}
+
+	private Set<Integer> selectCurrentDescriptor() {
+		Set<Integer> unitsToReset = new LinkedHashSet<Integer>();
+		final long delta = maxDate.getTime() - minDate.getTime();
+		int unitStep = 1;
+		long unitMultiplicator = 1;
+		long numberOfComponents = 0;
+		long maxComponents = 0;
+		Iterator<UnitDescriptor> iterator = descriptors.iterator();
+		do {
+			currentDescriptor = iterator.next();
+
+			unitMultiplicator = currentDescriptor.getUnitMultiplicator();
+			unitStep = currentDescriptor.getUnitStep();
+			unitsToReset.add(currentDescriptor.getCalendarUnit());
+
+			numberOfComponents = (long) Math.ceil((double) delta
+					/ unitMultiplicator / unitStep);
+
+			String string = currentDescriptor.getDateFormat().replaceAll("'",
+					"");
+			maxComponents = getWidth() / string.length() / 8;
+
+			if (currentDescriptor == forcedDescriptor) {
+				break;
+			}
+		} while (isDescriptorForced() || iterator.hasNext()
+				&& numberOfComponents > maxComponents);
+		unitsToReset.remove(currentDescriptor.getCalendarUnit());
+		return unitsToReset;
 	}
 
 	public UnitDescriptor getForcedDescriptor() {
