@@ -1,10 +1,12 @@
 package fr.vergne.taskmanager.gui.todo;
 
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -19,6 +21,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import fr.vergne.taskmanager.gui.TaskUpdateDialog;
@@ -36,6 +39,25 @@ public class Todo extends JPanel {
 	public Todo() {
 		setLayout(new GridLayout(1, 1));
 		add(tablePane);
+		table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table,
+					Object data, boolean isSelected, boolean hasFocus, int row,
+					int col) {
+				String string;
+				if (data instanceof Date) {
+					string = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+							.format(data);
+				} else if (data != null) {
+					string = data.toString();
+				} else {
+					string = "";
+				}
+				return super.getTableCellRendererComponent(table, string,
+						isSelected, hasFocus, row, col);
+			}
+		});
 		table.getSelectionModel().setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
 
