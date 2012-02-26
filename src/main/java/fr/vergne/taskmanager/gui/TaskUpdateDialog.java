@@ -6,8 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,7 +24,6 @@ import javax.swing.JTextField;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskStatus;
 
-// TODO replace multicomponent by monocomponent for date entries
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
@@ -170,22 +166,8 @@ public class TaskUpdateDialog extends JDialog {
 
 	static class JDateField extends JPanel {
 		private Calendar calendar = new GregorianCalendar();
-		private final JFormattedTextField yearField = new JFormattedTextField(
-				new IntegerFormatter());
-		private final JFormattedTextField monthField = new JFormattedTextField(
-				new IntegerFormatter());
-		private final JFormattedTextField dayField = new JFormattedTextField(
-				new IntegerFormatter());
-		private final JFormattedTextField hourField = new JFormattedTextField(
-				new IntegerFormatter());
-		private final JFormattedTextField minuteField = new JFormattedTextField(
-				new IntegerFormatter());
-		private final JFormattedTextField secondField = new JFormattedTextField(
-				new IntegerFormatter());
+		private final JTextField dateField = new JTextField();
 		private final JCheckBox checkbox = new JCheckBox();
-		private final JFormattedTextField[] fields = new JFormattedTextField[] {
-				yearField, monthField, dayField, hourField, minuteField,
-				secondField };
 		private final boolean isFacultative;
 
 		public JDateField(boolean facultative) {
@@ -203,41 +185,10 @@ public class TaskUpdateDialog extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					updateFields();
+					updateDateField();
 				}
 
 			});
-
-			PropertyChangeListener valueListener = new PropertyChangeListener() {
-
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					if (event.getNewValue() != null) {
-						if (event.getSource() == yearField) {
-							calendar.set(Calendar.YEAR,
-									(Integer) yearField.getValue());
-						} else if (event.getSource() == monthField) {
-							calendar.set(Calendar.MONTH,
-									(Integer) monthField.getValue() - 1);
-						} else if (event.getSource() == dayField) {
-							calendar.set(Calendar.DAY_OF_MONTH,
-									(Integer) dayField.getValue());
-						} else if (event.getSource() == hourField) {
-							calendar.set(Calendar.HOUR_OF_DAY,
-									(Integer) hourField.getValue());
-						} else if (event.getSource() == minuteField) {
-							calendar.set(Calendar.MINUTE,
-									(Integer) minuteField.getValue());
-						} else if (event.getSource() == secondField) {
-							calendar.set(Calendar.SECOND,
-									(Integer) secondField.getValue());
-						} else {
-							throw new IllegalStateException(
-									"This case should not happen.");
-						}
-					}
-				}
-			};
 
 			KeyListener keyListener = new KeyListener() {
 
@@ -248,28 +199,75 @@ public class TaskUpdateDialog extends JDialog {
 
 				@Override
 				public void keyReleased(KeyEvent event) {
-					if (event.getKeyCode() == KeyEvent.VK_DOWN) {
-						JFormattedTextField field = (JFormattedTextField) event
-								.getSource();
-						field.setValue((Integer) field.getValue() - 1);
-						updateFields();
-					} else if (event.getKeyCode() == KeyEvent.VK_UP) {
-						JFormattedTextField field = (JFormattedTextField) event
-								.getSource();
-						field.setValue((Integer) field.getValue() + 1);
-						updateFields();
-					} else if (event.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-						JFormattedTextField field = (JFormattedTextField) event
-								.getSource();
-						field.setValue((Integer) field.getValue() + 10);
-						updateFields();
-					} else if (event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-						JFormattedTextField field = (JFormattedTextField) event
-								.getSource();
-						field.setValue((Integer) field.getValue() - 10);
-						updateFields();
+					int caretPosition = dateField.getCaretPosition();
+
+					int unit;
+					if (caretPosition > 16) {
+						unit = Calendar.SECOND;
+					} else if (caretPosition > 13) {
+						unit = Calendar.MINUTE;
+					} else if (caretPosition > 10) {
+						unit = Calendar.HOUR_OF_DAY;
+					} else if (caretPosition > 7) {
+						unit = Calendar.DAY_OF_MONTH;
+					} else if (caretPosition > 4) {
+						unit = Calendar.MONTH;
+					} else if (caretPosition >= 0) {
+						unit = Calendar.YEAR;
 					} else {
-						// do nothing
+						throw new RuntimeException(
+								"This case should not happen.");
+					}
+
+					int step;
+					if (event.getKeyCode() == KeyEvent.VK_DOWN) {
+						step = -1;
+					} else if (event.getKeyCode() == KeyEvent.VK_UP) {
+						step = 1;
+					} else if (event.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+						switch (unit) {
+						case Calendar.SECOND:
+						case Calendar.MINUTE:
+						case Calendar.DAY_OF_MONTH:
+						case Calendar.YEAR:
+							step = 10;
+							break;
+						case Calendar.HOUR_OF_DAY:
+						case Calendar.MONTH:
+							step = 6;
+							break;
+
+						default:
+							throw new RuntimeException(unit
+									+ " is not a managed case.");
+						}
+					} else if (event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+						switch (unit) {
+						case Calendar.SECOND:
+						case Calendar.MINUTE:
+						case Calendar.DAY_OF_MONTH:
+						case Calendar.YEAR:
+							step = -10;
+							break;
+						case Calendar.HOUR_OF_DAY:
+						case Calendar.MONTH:
+							step = -6;
+							break;
+
+						default:
+							throw new RuntimeException(unit
+									+ " is not a managed case.");
+						}
+					} else {
+						step = 0;
+					}
+
+					if (step != 0) {
+						calendar.add(unit, step);
+						updateDateField();
+						dateField.setCaretPosition(caretPosition);
+					} else {
+						// update nothing
 					}
 				}
 
@@ -279,32 +277,14 @@ public class TaskUpdateDialog extends JDialog {
 				}
 			};
 
-			for (JFormattedTextField field : fields) {
-				field.addPropertyChangeListener("value", valueListener);
-				field.addKeyListener(keyListener);
-			}
+			dateField.addKeyListener(keyListener);
 		}
 
 		private void initComponents() {
 			setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-			add(yearField);
-			add(new JLabel("-"));
-			add(monthField);
-			add(new JLabel("-"));
-			add(dayField);
-			add(new JLabel("    "));
-			add(hourField);
-			add(new JLabel(":"));
-			add(minuteField);
-			add(new JLabel(":"));
-			add(secondField);
+			add(dateField);
 
-			yearField.setColumns(4);
-			monthField.setColumns(2);
-			dayField.setColumns(2);
-			hourField.setColumns(2);
-			minuteField.setColumns(2);
-			secondField.setColumns(2);
+			dateField.setColumns(19);
 
 			if (isFacultative) {
 				add(new JLabel("  "));
@@ -324,33 +304,32 @@ public class TaskUpdateDialog extends JDialog {
 				date = new Date();
 			}
 			calendar.setTime(date);
-			updateFields();
+			updateDateField();
 		}
 
-		private void updateFields() {
+		private void updateDateField() {
 			boolean checked = checkbox.isSelected();
-			for (JFormattedTextField field : fields) {
-				field.setEnabled(checked);
-			}
-			
-			yearField.setValue(calendar.get(Calendar.YEAR));
-			monthField.setValue(calendar.get(Calendar.MONTH) + 1);
-			dayField.setValue(calendar.get(Calendar.DAY_OF_MONTH));
-			hourField.setValue(calendar.get(Calendar.HOUR_OF_DAY));
-			minuteField.setValue(calendar.get(Calendar.MINUTE));
-			secondField.setValue(calendar.get(Calendar.SECOND));
+			dateField.setEnabled(checked);
+
+			int year = calendar.get(Calendar.YEAR);
+			int month = calendar.get(Calendar.MONTH) + 1;
+			int day = calendar.get(Calendar.DAY_OF_MONTH);
+			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+			int min = calendar.get(Calendar.MINUTE);
+			int sec = calendar.get(Calendar.SECOND);
+			dateField.setText(String.format("%04d-%02d-%02d %02d:%02d:%02d",
+					year, month, day, hour, min, sec));
 		}
 
 		@Override
 		public synchronized void addKeyListener(KeyListener keyListener) {
-			for (JFormattedTextField field : fields) {
-				field.addKeyListener(keyListener);
-			}
+			dateField.addKeyListener(keyListener);
 		}
 
 		@Override
 		public synchronized KeyListener[] getKeyListeners() {
-			return fields[0].getKeyListeners();
+			return dateField.getKeyListeners();
 		}
 	}
+
 }
