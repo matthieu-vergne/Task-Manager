@@ -35,8 +35,14 @@ public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();
 	private final JTable table = new JTable(model);
 	private final JScrollPane tablePane = new JScrollPane(table);
+	private final JPopupMenu menu = new JPopupMenu();
 
 	public Todo() {
+		initComponents();
+		initListeners();
+	}
+
+	private void initComponents() {
 		setLayout(new GridLayout(1, 1));
 		add(tablePane);
 		table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
@@ -61,9 +67,10 @@ public class Todo extends JPanel {
 		table.getSelectionModel().setSelectionMode(
 				ListSelectionModel.SINGLE_SELECTION);
 
-		final JPopupMenu menu = new JPopupMenu();
 		table.setComponentPopupMenu(menu);
+	}
 
+	private void initListeners() {
 		table.getSelectionModel().addListSelectionListener(
 				new ListSelectionListener() {
 
@@ -241,6 +248,24 @@ public class Todo extends JPanel {
 
 	private void updateMenu(final JPopupMenu menu) {
 		menu.removeAll();
+		menu.add(new AbstractAction("Add...") {
+
+			@Override
+			public boolean isEnabled() {
+				return true;
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Task task = new Task();
+				TaskUpdateDialog dialog = new TaskUpdateDialog(task);
+				dialog.setVisible(true);
+				if (dialog.validated) {
+					model.getList().add(task);
+				}
+			}
+
+		});
 		menu.add(new AbstractAction("Edit...") {
 
 			@Override
