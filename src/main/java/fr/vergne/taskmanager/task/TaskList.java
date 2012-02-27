@@ -18,8 +18,6 @@ import org.xml.sax.helpers.AttributesImpl;
 import fr.vergne.taskmanager.export.Exportable;
 import fr.vergne.taskmanager.gui.gantt.UpdateListener;
 
-// TODO manage deleted tasks (including in XML)
-// TODO add different methods to get all or a given kind of tasks (deleted, finished, running, ...)
 public class TaskList implements Exportable {
 
 	private final LinkedList<Task> tasks = new LinkedList<Task>();

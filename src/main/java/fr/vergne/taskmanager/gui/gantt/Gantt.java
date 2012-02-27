@@ -27,7 +27,6 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
-// TODO manage running steps (subtask = subperiods)
 // TODO assign facultative titles to subtasks
 // TODO add cursor looking for the position of the mouse
 @SuppressWarnings("serial")
