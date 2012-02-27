@@ -2,12 +2,15 @@ package fr.vergne.taskmanager.history;
 
 import java.util.Date;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.sax.TransformerHandler;
 
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -19,19 +22,43 @@ public abstract class History<T> implements Iterable<History.HistoryEntry<T>>,
 		Exportable {
 
 	private final Deque<HistoryEntry<T>> history = new LinkedList<HistoryEntry<T>>();
+	private final Map<HistoryEntry<T>, String> comments = new HashMap<HistoryEntry<T>, String>();
 
-	protected void push(T value, Date date) {
+	protected void push(T value, String comment, Date date) {
 		if (history.isEmpty() || getYoungestValue() != null
 				&& !getYoungestValue().equals(value)
 				|| getYoungestValue() == null && value != null) {
-			history.add(new HistoryEntry<T>(date, value));
+			history.addLast(new HistoryEntry<T>(date, value));
 		} else {
 			// do not insert double
 		}
+
+		HistoryEntry<T> entry = history.getLast();
+		setComment(entry, comment);
+	}
+
+	public void setComment(HistoryEntry<T> entry, String comment) {
+		if (comment != null && !comment.isEmpty()) {
+			comments.put(entry, comment);
+		} else {
+			comments.remove(entry);
+		}
+	}
+
+	public String getComment(HistoryEntry<T> entry) {
+		return comments.get(entry);
+	}
+
+	protected void push(T value, Date date) {
+		push(value, null, date);
+	}
+
+	public void push(T value, String comment) {
+		push(value, comment, new Date());
 	}
 
 	public void push(T value) {
-		push(value, new Date());
+		push(value, (String) null);
 	}
 
 	public T getYoungestValue() {
@@ -214,6 +241,11 @@ public abstract class History<T> implements Iterable<History.HistoryEntry<T>>,
 				AttributesImpl attributes = new AttributesImpl();
 				attributes.addAttribute("", "", "date", "CDATA", ""
 						+ data.getDate().getTime());
+				String comment = comments.get(data);
+				if (comment != null) {
+					attributes
+							.addAttribute("", "", "comment", "CDATA", comment);
+				}
 				handler.startElement("", "", "value", attributes);
 			}
 			T value = data.getValue();
@@ -232,15 +264,21 @@ public abstract class History<T> implements Iterable<History.HistoryEntry<T>>,
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
+			NamedNodeMap attributes = child.getAttributes();
 
-			String time = child.getAttributes().getNamedItem("date")
-					.getNodeValue();
+			String time = attributes.getNamedItem("date").getNodeValue();
 			Date date = new Date(Long.parseLong(time));
+
+			String comment = null;
+			Node commentNode = attributes.getNamedItem("comment");
+			if (commentNode != null) {
+				comment = commentNode.getNodeValue();
+			}
 
 			String string = child.getTextContent();
 			T value = string.isEmpty() ? null : stringToData(string);
 
-			push(value, date);
+			push(value, comment, date);
 		}
 	}
 

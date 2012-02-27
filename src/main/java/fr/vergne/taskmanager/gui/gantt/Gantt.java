@@ -27,7 +27,6 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
-// TODO assign facultative titles to subtasks
 // TODO add cursor looking for the position of the mouse
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
@@ -382,7 +381,7 @@ public class Gantt extends JPanel {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					period.showUpdateDialog();
+					period.showTaskUpdateDialog();
 				}
 
 			});

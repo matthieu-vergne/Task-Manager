@@ -29,7 +29,7 @@ import javax.swing.JTextField;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskStatus;
 
-// TODO manage manual modification of dates (retyping, removing, ...)
+// TODO improve manual modification of dates (update during typing)
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
@@ -171,6 +171,8 @@ public class TaskUpdateDialog extends JDialog {
 	}
 
 	static class JDateField extends JPanel {
+		public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm:ss");
 		private Calendar calendar = new GregorianCalendar();
 		private final JTextField dateField = new JTextField();
 		private final JCheckBox checkbox = new JCheckBox();
@@ -197,12 +199,12 @@ public class TaskUpdateDialog extends JDialog {
 			});
 
 			dateField.addFocusListener(new FocusListener() {
-				
+
 				@Override
 				public void focusLost(FocusEvent arg0) {
 					applyValue(dateField.getText());
 				}
-				
+
 				@Override
 				public void focusGained(FocusEvent arg0) {
 					// do nothing
@@ -264,8 +266,7 @@ public class TaskUpdateDialog extends JDialog {
 			boolean checked = checkbox.isSelected();
 			dateField.setEnabled(checked);
 
-			dateField.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-					.format(calendar.getTime()));
+			dateField.setText(DATE_FORMAT.format(calendar.getTime()));
 		}
 
 		@Override

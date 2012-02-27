@@ -13,6 +13,7 @@ import javax.swing.Spring;
 import javax.swing.SpringLayout;
 import javax.swing.border.LineBorder;
 
+import fr.vergne.taskmanager.gui.CommentUpdateDialog;
 import fr.vergne.taskmanager.gui.TaskUpdateDialog;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.Task.TaskRun;
@@ -54,24 +55,59 @@ public class Period extends JPanel {
 			final long max = getStop().getTime();
 			final long delta = max - min;
 			SpringWidth ref = new SpringWidth(subtasks);
-			for (TaskRun run : task.getRunningHistory()) {
+			for (final TaskRun run : task.getRunningHistory()) {
 				final long start = run.getStart().getTime();
 				final long stop = run.getStop().getTime();
-				JPanel runPanel = new JPanel();
-				runPanel.setBorder(new LineBorder(Color.BLACK));
-				runPanel.setBackground(Color.WHITE);
-				subtasks.add(runPanel);
+				JLabel runLabel = new JLabel(run.getComment());
+				runLabel.setBorder(new LineBorder(Color.BLACK));
+				runLabel.setHorizontalAlignment(JLabel.CENTER);
+				runLabel.setVerticalAlignment(JLabel.CENTER);
+				subtasks.add(runLabel);
 				Spring scale1 = Spring
 						.scale(ref, (float) (start - min) / delta);
 				Spring scale2 = Spring.scale(ref, (float) (stop - min) / delta);
-				layout.putConstraint(SpringLayout.WEST, runPanel, scale1,
+				layout.putConstraint(SpringLayout.WEST, runLabel, scale1,
 						SpringLayout.WEST, subtasks);
-				layout.putConstraint(SpringLayout.EAST, runPanel, scale2,
+				layout.putConstraint(SpringLayout.EAST, runLabel, scale2,
 						SpringLayout.WEST, subtasks);
-				layout.putConstraint(SpringLayout.NORTH, runPanel, 0,
+				layout.putConstraint(SpringLayout.NORTH, runLabel, 0,
 						SpringLayout.NORTH, subtasks);
-				layout.putConstraint(SpringLayout.SOUTH, runPanel, 0,
+				layout.putConstraint(SpringLayout.SOUTH, runLabel, 0,
 						SpringLayout.SOUTH, subtasks);
+				
+				runLabel.addMouseListener(new MouseListener() {
+
+					@Override
+					public void mouseReleased(MouseEvent arg0) {
+						// do nothing
+					}
+
+					@Override
+					public void mousePressed(MouseEvent arg0) {
+						// do nothing
+					}
+
+					@Override
+					public void mouseExited(MouseEvent arg0) {
+						// do nothing
+					}
+
+					@Override
+					public void mouseEntered(MouseEvent arg0) {
+						// do nothing
+					}
+
+					@Override
+					public void mouseClicked(MouseEvent event) {
+						if (event.getButton() == MouseEvent.BUTTON1
+								&& event.getClickCount() > 1) {
+							showCommentUpdateDialog(run);
+						} else {
+							// do nothing
+						}
+					}
+
+				});
 			}
 		}
 
@@ -105,7 +141,7 @@ public class Period extends JPanel {
 			public void mouseClicked(MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1
 						&& event.getClickCount() > 1) {
-					showUpdateDialog();
+					showTaskUpdateDialog();
 				} else {
 					// do nothing
 				}
@@ -156,7 +192,11 @@ public class Period extends JPanel {
 		return isStartMilestone() || isStopMilestone();
 	}
 
-	public void showUpdateDialog() {
+	public void showTaskUpdateDialog() {
 		new TaskUpdateDialog(getTask()).setVisible(true);
+	}
+	
+	public void showCommentUpdateDialog(TaskRun run) {
+		new CommentUpdateDialog(getTask(), run).setVisible(true);
 	}
 }

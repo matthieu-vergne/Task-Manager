@@ -153,45 +153,61 @@ public class Task implements Exportable {
 	public Collection<TaskRun> getRunningHistory() {
 		Collection<TaskRun> list = new LinkedList<Task.TaskRun>();
 		History<TaskStatus> history = status.getHistory();
-		Date start = null;
+		HistoryEntry<TaskStatus> from = null;
 		for (HistoryEntry<TaskStatus> entry : history) {
-			if (start != null) {
-				list.add(new TaskRun(start, entry.getDate()));
-				start = null;
+			if (from != null) {
+				list.add(new TaskRun(history, from, entry));
+				from = null;
 			}
 
 			if (entry.getValue() == TaskStatus.RUNNING) {
-				start = entry.getDate();
+				from = entry;
 			}
 		}
 
-		if (start != null) {
-			list.add(new TaskRun(start, new Date()));
+		if (from != null) {
+			list.add(new TaskRun(history, from, null));
 		}
 		return list;
 	}
 
-	public static class TaskRun {
-		private final Date start;
-		private final Date stop;
+	public class TaskRun {
+		private final History<TaskStatus> history;
+		private final HistoryEntry<TaskStatus> from;
+		private final HistoryEntry<TaskStatus> to;
 
-		public TaskRun(Date start, Date stop) {
-			this.start = start;
-			this.stop = stop;
+		public TaskRun(History<TaskStatus> history,
+				HistoryEntry<TaskStatus> from, HistoryEntry<TaskStatus> to) {
+			this.history = history;
+			this.from = from;
+			this.to = to;
 		}
 
 		public Date getStart() {
-			return start;
+			return from.getDate();
 		}
 
 		public Date getStop() {
-			return stop;
+			return to == null ? new Date() : to.getDate();
+		}
+
+		public String getComment() {
+			return history.getComment(from);
+		}
+
+		public void setComment(String comment) {
+			history.setComment(from, comment);
+			fireUpdateEvent();
 		}
 	}
 
-	public void setStatus(TaskStatus status) {
-		this.status.set(status);
+	public void setStatus(TaskStatus status, String comment) {
+		this.status.getHistory().push(status, comment);
 		fireUpdateEvent();
+	}
+
+	public void setStatus(TaskStatus status) {
+		setStatus(status, null);
 	}
 
 	public boolean hasStart() {
