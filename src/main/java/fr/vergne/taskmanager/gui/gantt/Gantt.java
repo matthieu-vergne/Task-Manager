@@ -28,6 +28,9 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
+// TODO manage running steps (subtask = subperiods)
+// TODO assign facultative titles to subtasks
+// TODO manage milestones (stop only)
 // TODO add cursor looking for the position of the mouse
 // TODO display running parts regarding tasks history
 @SuppressWarnings("serial")
@@ -125,8 +128,7 @@ public class Gantt extends JPanel {
 	}
 
 	public void resetDisplay() {
-		periodCanvas.setMinDate(periodCanvas.getActualMinDate());
-		periodCanvas.setMaxDate(periodCanvas.getActualMaxDate());
+		periodCanvas.resetMinMax();
 		long min = periodCanvas.getMinDate().getTime();
 		long max = periodCanvas.getMaxDate().getTime();
 		median = (max + min) / 2;
@@ -139,6 +141,8 @@ public class Gantt extends JPanel {
 			initTimeBars();
 			periods.setBackground(new Color(0, 0, 0, 0));
 			periodPane.setBackground(new Color(0, 0, 0, 0));
+			periodPane
+					.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 			periods.setLayout(periodsLayout);
 			periods.add(timeCursor);
 			periods.add(lowTimeBar);
@@ -360,7 +364,7 @@ public class Gantt extends JPanel {
 
 		@Override
 		public void update() {
-			renewPeriods();
+			renewPeriodsAndMilestones();
 			repaint();
 		}
 	};
@@ -373,35 +377,33 @@ public class Gantt extends JPanel {
 		}
 		tasks = list;
 
-		renewPeriods();
+		renewPeriodsAndMilestones();
 		tasks.addUpdateListener(listener);
 	}
 
-	private void renewPeriods() {
+	private void renewPeriodsAndMilestones() {
 		periodCanvas.clear();
-		for (final Task task : tasks) {
-			if (task.hasDeadline()) {
-				final Period period = new Period(task);
-				JPopupMenu menu = new JPopupMenu();
-				menu.add(new AbstractAction("Edit...") {
+		for (final Task task : tasks.getAllTasks(false)) {
+			final Period period = new Period(task);
+			JPopupMenu menu = new JPopupMenu();
+			menu.add(new AbstractAction("Edit...") {
 
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						period.showUpdateDialog();
-					}
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					period.showUpdateDialog();
+				}
 
-				});
-				menu.add(new AbstractAction("Remove") {
+			});
+			menu.add(new AbstractAction("Remove") {
 
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						tasks.remove(task);
-					}
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					tasks.delete(task);
+				}
 
-				});
-				period.setComponentPopupMenu(menu);
-				periodCanvas.addPeriod(period);
-			}
+			});
+			period.setComponentPopupMenu(menu);
+			periodCanvas.addPeriod(period);
 		}
 	}
 

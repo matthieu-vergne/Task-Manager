@@ -26,7 +26,6 @@ import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.xml.Exporter;
 
-// FIXME manage milestones (single date) and display them in the gantt 
 // TODO manage key shortcut + popup menus at a general level
 @SuppressWarnings("serial")
 public class Gui extends JFrame {

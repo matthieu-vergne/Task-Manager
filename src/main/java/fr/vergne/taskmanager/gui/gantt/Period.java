@@ -94,7 +94,19 @@ public class Period extends JLabel {
 	}
 
 	public boolean isBoundedPeriod() {
-		return getStop() != null;
+		return getStart() != null && getStop() != null;
+	}
+
+	public boolean isStartMilestone() {
+		return getStart() != null && getStop() == null;
+	}
+
+	public boolean isStopMilestone() {
+		return getStart() == null && getStop() != null;
+	}
+
+	public boolean isMilestone() {
+		return isStartMilestone() || isStopMilestone();
 	}
 
 	public void showUpdateDialog() {

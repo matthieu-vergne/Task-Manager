@@ -30,7 +30,9 @@ import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.task.TaskStatus;
 
-// TODO add buttons to add/remove/edit/clear
+//TODO display the running tasks at the top
+//TODO add buttons to add/remove/edit/clear
+//TODO add checkboxes to display deleted/finished tasks
 @SuppressWarnings("serial")
 public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();
@@ -319,7 +321,7 @@ public class Todo extends JPanel {
 		if (!selection.isSelectionEmpty()) {
 			int index = selection.getMinSelectionIndex();
 			Task task = model.getTask(index);
-			model.getList().remove(task);
+			model.getList().delete(task);
 			selection.clearSelection();
 		}
 	}

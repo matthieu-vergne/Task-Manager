@@ -2,26 +2,44 @@ package fr.vergne.taskmanager.task;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 
 import fr.vergne.taskmanager.export.Exportable;
 import fr.vergne.taskmanager.gui.gantt.UpdateListener;
 
-public class TaskList implements Exportable, Iterable<Task> {
+// TODO manage deleted tasks (including in XML)
+// TODO add different methods to get all or a given kind of tasks (deleted, finished, running, ...)
+public class TaskList implements Exportable {
 
 	private final LinkedList<Task> tasks = new LinkedList<Task>();
+	private final Map<Task, Date> deletedTasks = new HashMap<Task, Date>();
 
-	public List<Task> getDoneTasks() {
+	public Collection<Task> getAllTasks(boolean getDeleted) {
+		LinkedList<Task> list = new LinkedList<Task>(tasks);
+		if (!getDeleted) {
+			list.removeAll(getDeletedTasks());
+		}
+		return list;
+	}
+
+	public Collection<Task> getDeletedTasks() {
+		return new LinkedList<Task>(deletedTasks.keySet());
+	}
+
+	public List<Task> getDoneTasks(boolean getDeleted) {
 		List<Task> list = new LinkedList<Task>();
-		for (Task task : this) {
+		for (Task task : getAllTasks(getDeleted)) {
 			if (task.isDone()) {
 				list.add(task);
 			}
@@ -29,15 +47,15 @@ public class TaskList implements Exportable, Iterable<Task> {
 		return list;
 	}
 
-	public List<Task> getNotDoneTasks() {
-		List<Task> list = new LinkedList<Task>(tasks);
-		list.removeAll(getDoneTasks());
+	public List<Task> getNotDoneTasks(boolean getDeleted) {
+		List<Task> list = new LinkedList<Task>(getAllTasks(getDeleted));
+		list.removeAll(getDoneTasks(getDeleted));
 		return list;
 	}
 
-	public List<Task> getStartedTasks() {
+	public List<Task> getStartedTasks(boolean getDeleted) {
 		List<Task> list = new LinkedList<Task>();
-		for (Task task : this) {
+		for (Task task : getAllTasks(getDeleted)) {
 			if (task.isStarted()) {
 				list.add(task);
 			}
@@ -45,15 +63,15 @@ public class TaskList implements Exportable, Iterable<Task> {
 		return list;
 	}
 
-	public List<Task> getNotStartedTasks() {
-		List<Task> list = new LinkedList<Task>(tasks);
-		list.removeAll(getStartedTasks());
+	public List<Task> getNotStartedTasks(boolean getDeleted) {
+		List<Task> list = new LinkedList<Task>(getAllTasks(getDeleted));
+		list.removeAll(getStartedTasks(getDeleted));
 		return list;
 	}
 
-	public List<Task> getRunningTasks() {
+	public List<Task> getRunningTasks(boolean getDeleted) {
 		List<Task> list = new LinkedList<Task>();
-		for (Task task : this) {
+		for (Task task : getAllTasks(getDeleted)) {
 			if (task.isRunning()) {
 				list.add(task);
 			}
@@ -61,9 +79,9 @@ public class TaskList implements Exportable, Iterable<Task> {
 		return list;
 	}
 
-	public List<Task> getNotRunningTasks() {
-		List<Task> list = new LinkedList<Task>(tasks);
-		list.removeAll(getRunningTasks());
+	public List<Task> getNotRunningTasks(boolean getDeleted) {
+		List<Task> list = new LinkedList<Task>(getAllTasks(getDeleted));
+		list.removeAll(getRunningTasks(getDeleted));
 		return list;
 	}
 
@@ -97,17 +115,35 @@ public class TaskList implements Exportable, Iterable<Task> {
 		};
 	}
 
+	public boolean isDeleted(Task task) {
+		return deletedTasks.containsKey(task);
+	}
+
+	public Date getDeletiontDate(Task task) {
+		return deletedTasks.get(task);
+	}
+
 	@Override
 	public void write(TransformerHandler handler) throws SAXException {
 		handler.startElement("", "", "tasks", null);
-		for (Task task : this) {
-			task.write(handler);
+		for (Task task : tasks) {
+			if (isDeleted(task)) {
+				AttributesImpl attributes = new AttributesImpl();
+				attributes.addAttribute("", "", "date", "CDATA", ""
+						+ getDeletiontDate(task).getTime());
+				handler.startElement("", "", "deleted", attributes);
+				task.write(handler);
+				handler.endElement("", "", "deleted");
+			} else {
+				task.write(handler);
+			}
 		}
 		handler.endElement("", "", "tasks");
 	}
 
-	public void clear() {
+	private void clear() {
 		tasks.clear();
+		deletedTasks.clear();
 	}
 
 	@Override
@@ -116,9 +152,20 @@ public class TaskList implements Exportable, Iterable<Task> {
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
-			Task task = new Task();
-			task.read(child);
-			add(task);
+			if (child.getNodeName().equals("deleted")) {
+				Task task = new Task();
+				task.read(child.getFirstChild());
+				add(task);
+				
+				String time = child.getAttributes().getNamedItem("date")
+						.getNodeValue();
+				Date date = new Date(Long.parseLong(time));
+				deletedTasks.put(task, date);
+			} else {
+				Task task = new Task();
+				task.read(child);
+				add(task);
+			}
 		}
 		fireUpdateEvent();
 	}
@@ -137,10 +184,13 @@ public class TaskList implements Exportable, Iterable<Task> {
 		fireUpdateEvent();
 	}
 
-	public void remove(Task task) {
-		tasks.remove(task);
-		task.removeUpdateListener(taskListener);
-		fireUpdateEvent();
+	public void delete(Task task) {
+		if (tasks.contains(task)) {
+			deletedTasks.put(task, new Date());
+			fireUpdateEvent();
+		} else {
+			throw new IllegalArgumentException(task + " is not a known task.");
+		}
 	}
 
 	public Task get(int index) {
@@ -149,11 +199,6 @@ public class TaskList implements Exportable, Iterable<Task> {
 
 	public int size() {
 		return tasks.size();
-	}
-
-	@Override
-	public Iterator<Task> iterator() {
-		return tasks.iterator();
 	}
 
 	private final Collection<UpdateListener> updateListeners = new LinkedList<UpdateListener>();

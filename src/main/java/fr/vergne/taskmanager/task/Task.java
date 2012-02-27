@@ -154,8 +154,12 @@ public class Task implements Exportable {
 		fireUpdateEvent();
 	}
 
+	public boolean hasStart() {
+		return getStart() != null;
+	}
+
 	public boolean hasDeadline() {
-		return deadline != null;
+		return getDeadline() != null;
 	}
 
 	@Override
@@ -220,16 +224,22 @@ public class Task implements Exportable {
 	private final Collection<UpdateListener> updateListeners = new LinkedList<UpdateListener>();
 
 	public void addUpdateListener(UpdateListener listener) {
-		updateListeners.add(listener);
+		synchronized (updateListeners) {
+			updateListeners.add(listener);
+		}
 	}
 
 	public void removeUpdateListener(UpdateListener listener) {
-		updateListeners.remove(listener);
+		synchronized (updateListeners) {
+			updateListeners.remove(listener);
+		}
 	}
 
 	protected void fireUpdateEvent() {
-		for (UpdateListener listener : updateListeners) {
-			listener.update();
+		synchronized (updateListeners) {
+			for (UpdateListener listener : updateListeners) {
+				listener.update();
+			}
 		}
 	}
 }

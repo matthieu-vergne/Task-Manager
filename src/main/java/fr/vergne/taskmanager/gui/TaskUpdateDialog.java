@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskStatus;
 
+// TODO manage manual modification of dates (retyping, removing, ...)
 @SuppressWarnings("serial")
 public class TaskUpdateDialog extends JDialog {
 
@@ -313,7 +314,7 @@ public class TaskUpdateDialog extends JDialog {
 			dateField.setEnabled(checked);
 
 			dateField.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-			.format(calendar.getTime()));
+					.format(calendar.getTime()));
 		}
 
 		@Override

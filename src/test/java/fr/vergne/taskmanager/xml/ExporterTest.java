@@ -31,6 +31,12 @@ public class ExporterTest {
 			list.add(task);
 		}
 
+		{
+			Task task = new Task("task 3");
+			list.add(task);
+			list.delete(task);
+		}
+
 		File file = new File("test.xml");
 		file.deleteOnExit();
 		Exporter.write(list, file);
@@ -48,6 +54,9 @@ public class ExporterTest {
 			assertEquals(task1.getDescription(), task2.getDescription());
 			assertEquals(task1.getCreationDate(), task2.getCreationDate());
 			assertEquals(task1.getStatus(), task2.getStatus());
+			assertEquals(list.isDeleted(task1), list2.isDeleted(task2));
+			assertEquals(list.getDeletiontDate(task1),
+					list2.getDeletiontDate(task2));
 		}
 
 		File file2 = new File("test2.xml");
