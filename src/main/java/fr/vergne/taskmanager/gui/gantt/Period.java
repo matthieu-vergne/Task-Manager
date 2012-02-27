@@ -22,7 +22,7 @@ public class Period extends JLabel {
 		setBorder(new LineBorder(Color.BLACK));
 		setHorizontalAlignment(JLabel.CENTER);
 		setVerticalAlignment(JLabel.CENTER);
-		setBackground(null);
+		setBackground(Color.WHITE);
 
 		initListeners();
 	}

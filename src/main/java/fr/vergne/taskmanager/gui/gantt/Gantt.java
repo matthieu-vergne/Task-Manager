@@ -4,12 +4,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -21,7 +28,6 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
-// TODO export to pictures
 // TODO add cursor looking for the position of the mouse
 // TODO display running parts regarding tasks history
 @SuppressWarnings("serial")
@@ -46,9 +52,10 @@ public class Gantt extends JPanel {
 	};
 	private final PeriodCanvas periodCanvas = new PeriodCanvas();
 	private final JScrollPane periodPane = new JScrollPane(periodCanvas);
+	private final JPanel periods = new JPanel();
 	private final JPanel options = new JPanel();
 	private final JPanel timeCursor = new JPanel();
-	private final SpringLayout layout = new SpringLayout();
+	private final SpringLayout periodsLayout = new SpringLayout();
 	private long median = new Date().getTime();
 	private long radius = 1800000;
 	private final Thread cursorThread;
@@ -93,6 +100,10 @@ public class Gantt extends JPanel {
 					zoom(1.0 / 0.8);
 				} else if (event.getKeyCode() == KeyEvent.VK_F5) {
 					resetDisplay();
+				} else if (event.getKeyCode() == KeyEvent.VK_P
+						&& event.isControlDown()) {
+					snapshot(false);
+					event.setKeyCode(0);
 				} else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
 					goTo(new Date((long) (median - radius * 0.1)));
 				} else if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -124,68 +135,93 @@ public class Gantt extends JPanel {
 	}
 
 	private void initComponents() {
-		options.setLayout(new FlowLayout());
-		options.add(new JButton(new AbstractAction("Start sort") {
+		{
+			initTimeBars();
+			periods.setBackground(new Color(0, 0, 0, 0));
+			periodPane.setBackground(new Color(0, 0, 0, 0));
+			periods.setLayout(periodsLayout);
+			periods.add(timeCursor);
+			periods.add(lowTimeBar);
+			periods.add(highTimeBar);
+			periods.add(periodPane);
+			timeCursor.setBackground(Color.GREEN);
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				periodCanvas.sortByStartDate();
-			}
-		}));
-		options.add(new JButton(new AbstractAction("Stop sort") {
+			periodsLayout.putConstraint(SpringLayout.NORTH, highTimeBar, 0,
+					SpringLayout.NORTH, periods);
+			periodsLayout.putConstraint(SpringLayout.WEST, highTimeBar, 0,
+					SpringLayout.WEST, periods);
+			periodsLayout.putConstraint(SpringLayout.EAST, highTimeBar, 0,
+					SpringLayout.EAST, periods);
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				periodCanvas.sortByStopDate();
-			}
-		}));
+			periodsLayout.putConstraint(SpringLayout.NORTH, lowTimeBar, 0,
+					SpringLayout.SOUTH, highTimeBar);
+			periodsLayout.putConstraint(SpringLayout.WEST, lowTimeBar, 0,
+					SpringLayout.WEST, periods);
+			periodsLayout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
+					SpringLayout.EAST, periods);
 
-		initTimeBars();
+			periodsLayout.putConstraint(SpringLayout.NORTH, periodPane, 0,
+					SpringLayout.SOUTH, lowTimeBar);
+			periodsLayout.putConstraint(SpringLayout.WEST, periodPane, 0,
+					SpringLayout.WEST, periods);
+			periodsLayout.putConstraint(SpringLayout.EAST, periodPane, 0,
+					SpringLayout.EAST, periods);
+			periodsLayout.putConstraint(SpringLayout.SOUTH, periodPane, 0,
+					SpringLayout.SOUTH, periods);
 
-		add(lowTimeBar);
-		add(highTimeBar);
-		add(periodPane);
-		add(timeCursor);
-		add(options);
-		timeCursor.setBackground(Color.GREEN);
+			periodsLayout.putConstraint(SpringLayout.NORTH, timeCursor, 0,
+					SpringLayout.NORTH, periods);
+			periodsLayout.putConstraint(SpringLayout.SOUTH, timeCursor, 0,
+					SpringLayout.SOUTH, periods);
+			periodsLayout.putConstraint(SpringLayout.WIDTH, timeCursor, 2,
+					SpringLayout.WEST, periods);
+		}
 
-		setLayout(layout);
-		layout.putConstraint(SpringLayout.NORTH, highTimeBar, 0,
-				SpringLayout.NORTH, this);
-		layout.putConstraint(SpringLayout.WEST, highTimeBar, 0,
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.EAST, highTimeBar, 0,
-				SpringLayout.EAST, this);
+		{
+			options.setLayout(new FlowLayout());
+			options.add(new JButton(new AbstractAction("Start sort") {
 
-		layout.putConstraint(SpringLayout.NORTH, lowTimeBar, 0,
-				SpringLayout.SOUTH, highTimeBar);
-		layout.putConstraint(SpringLayout.WEST, lowTimeBar, 0,
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
-				SpringLayout.EAST, this);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					periodCanvas.sortByStartDate();
+				}
+			}));
+			options.add(new JButton(new AbstractAction("Stop sort") {
 
-		layout.putConstraint(SpringLayout.SOUTH, options, 0,
-				SpringLayout.SOUTH, this);
-		layout.putConstraint(SpringLayout.WEST, lowTimeBar, 0,
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
-				SpringLayout.EAST, this);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					periodCanvas.sortByStopDate();
+				}
+			}));
+			options.add(new JButton(new AbstractAction("Snapshot") {
 
-		layout.putConstraint(SpringLayout.NORTH, periodPane, 0,
-				SpringLayout.SOUTH, lowTimeBar);
-		layout.putConstraint(SpringLayout.WEST, periodPane, 0,
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.EAST, periodPane, 0,
-				SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.SOUTH, periodPane, 0,
-				SpringLayout.NORTH, options);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					snapshot(false);
+				}
+			}));
+			options.add(new JButton(new AbstractAction("Snapshot (cursors)") {
 
-		layout.putConstraint(SpringLayout.NORTH, timeCursor, 0,
-				SpringLayout.NORTH, this);
-		layout.putConstraint(SpringLayout.SOUTH, timeCursor, 0,
-				SpringLayout.SOUTH, periodPane);
-		layout.putConstraint(SpringLayout.WIDTH, timeCursor, 2,
-				SpringLayout.WEST, this);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					snapshot(true);
+				}
+			}));
+		}
+
+		{
+			setLayout(new GridBagLayout());
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridy = 0;
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.weightx = 1;
+			constraints.weighty = 1;
+			add(periods, constraints);
+			constraints.gridy = 1;
+			constraints.fill = GridBagConstraints.HORIZONTAL;
+			constraints.weighty = 0;
+			add(options, constraints);
+		}
 	}
 
 	private void initTimeBars() {
@@ -298,9 +334,9 @@ public class Gantt extends JPanel {
 		long ref = new Date().getTime();
 		long delta = lowTimeBar.getMaxDate().getTime() - min;
 		int x = (int) ((ref - min) * getWidth() / delta);
-		x = Math.min(Math.max(-timeCursor.getWidth(), x), getWidth());
-		layout.putConstraint(SpringLayout.WEST, timeCursor, x,
-				SpringLayout.WEST, this);
+		x = Math.min(Math.max(-timeCursor.getWidth(), x), periods.getWidth());
+		periodsLayout.putConstraint(SpringLayout.WEST, timeCursor, x,
+				SpringLayout.WEST, periods);
 		timeCursor.invalidate();
 	}
 
@@ -366,6 +402,23 @@ public class Gantt extends JPanel {
 				period.setComponentPopupMenu(menu);
 				periodCanvas.addPeriod(period);
 			}
+		}
+	}
+
+	public void snapshot(boolean displayCursors) {
+		BufferedImage image = new BufferedImage(periods.getWidth(),
+				periods.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+		timeCursor.setVisible(displayCursors);
+		periods.paint(image.getGraphics());
+		timeCursor.setVisible(true);
+
+		File file = new File("snapshot.png");
+		Logger.getAnonymousLogger().info("Snapshot: " + file);
+		try {
+			ImageIO.write(image, "png", file);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

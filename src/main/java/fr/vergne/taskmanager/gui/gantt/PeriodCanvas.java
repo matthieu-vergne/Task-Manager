@@ -20,8 +20,7 @@ public class PeriodCanvas extends JPanel {
 	private Date maxDate = new Date(minDate.getTime() + 3600000);
 
 	public PeriodCanvas() {
-		setBackground(Color.WHITE);
-		setDoubleBuffered(true);
+		setBackground(new Color(0, 0, 0, 0));
 	}
 
 	public Date getActualMinDate() {
@@ -51,7 +50,9 @@ public class PeriodCanvas extends JPanel {
 	private boolean periodUpdated = false;
 
 	@Override
-	public void paint(Graphics arg0) {
+	public void paint(Graphics graphics) {
+		graphics.clearRect(0, 0, getWidth(), getHeight());
+		
 		if (!periodUpdated && minDate.equals(oldMinDate)
 				&& maxDate.equals(oldMaxDate)) {
 			// do not recompute the periods
@@ -62,7 +63,7 @@ public class PeriodCanvas extends JPanel {
 			periodUpdated = false;
 		}
 
-		super.paint(arg0);
+		super.paint(graphics);
 	}
 
 	private void computePeriods() {
