@@ -21,7 +21,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.SpringLayout;
 
 import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
@@ -30,9 +29,7 @@ import fr.vergne.taskmanager.task.TaskList;
 
 // TODO manage running steps (subtask = subperiods)
 // TODO assign facultative titles to subtasks
-// TODO manage milestones (stop only)
 // TODO add cursor looking for the position of the mouse
-// TODO display running parts regarding tasks history
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
 
@@ -54,7 +51,6 @@ public class Gantt extends JPanel {
 		};
 	};
 	private final PeriodCanvas periodCanvas = new PeriodCanvas();
-	private final JScrollPane periodPane = new JScrollPane(periodCanvas);
 	private final JPanel periods = new JPanel();
 	private final JPanel options = new JPanel();
 	private final JPanel timeCursor = new JPanel();
@@ -140,14 +136,11 @@ public class Gantt extends JPanel {
 		{
 			initTimeBars();
 			periods.setBackground(new Color(0, 0, 0, 0));
-			periodPane.setBackground(new Color(0, 0, 0, 0));
-			periodPane
-					.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 			periods.setLayout(periodsLayout);
 			periods.add(timeCursor);
 			periods.add(lowTimeBar);
 			periods.add(highTimeBar);
-			periods.add(periodPane);
+			periods.add(periodCanvas);
 			timeCursor.setBackground(Color.GREEN);
 
 			periodsLayout.putConstraint(SpringLayout.NORTH, highTimeBar, 0,
@@ -164,13 +157,13 @@ public class Gantt extends JPanel {
 			periodsLayout.putConstraint(SpringLayout.EAST, lowTimeBar, 0,
 					SpringLayout.EAST, periods);
 
-			periodsLayout.putConstraint(SpringLayout.NORTH, periodPane, 0,
+			periodsLayout.putConstraint(SpringLayout.NORTH, periodCanvas, 0,
 					SpringLayout.SOUTH, lowTimeBar);
-			periodsLayout.putConstraint(SpringLayout.WEST, periodPane, 0,
+			periodsLayout.putConstraint(SpringLayout.WEST, periodCanvas, 0,
 					SpringLayout.WEST, periods);
-			periodsLayout.putConstraint(SpringLayout.EAST, periodPane, 0,
+			periodsLayout.putConstraint(SpringLayout.EAST, periodCanvas, 0,
 					SpringLayout.EAST, periods);
-			periodsLayout.putConstraint(SpringLayout.SOUTH, periodPane, 0,
+			periodsLayout.putConstraint(SpringLayout.SOUTH, periodCanvas, 0,
 					SpringLayout.SOUTH, periods);
 
 			periodsLayout.putConstraint(SpringLayout.NORTH, timeCursor, 0,
@@ -364,7 +357,7 @@ public class Gantt extends JPanel {
 
 		@Override
 		public void update() {
-			renewPeriodsAndMilestones();
+			renewPeriods();
 			repaint();
 		}
 	};
@@ -377,11 +370,11 @@ public class Gantt extends JPanel {
 		}
 		tasks = list;
 
-		renewPeriodsAndMilestones();
+		renewPeriods();
 		tasks.addUpdateListener(listener);
 	}
 
-	private void renewPeriodsAndMilestones() {
+	private void renewPeriods() {
 		periodCanvas.clear();
 		for (final Task task : tasks.getAllTasks(false)) {
 			final Period period = new Period(task);

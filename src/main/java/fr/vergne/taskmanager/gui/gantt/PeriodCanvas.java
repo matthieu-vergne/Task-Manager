@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
+import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
 @SuppressWarnings("serial")
@@ -81,16 +82,18 @@ public class PeriodCanvas extends JPanel {
 			if (period.isBoundedPeriod() || period.isMilestone()) {
 				if (period.isBoundedPeriod() || period.isStartMilestone()) {
 					long start = period.getStart().getTime();
-					int x = (int) ((start - min) * getWidth() / delta);
-					layout.putConstraint(SpringLayout.WEST, period, x,
+					float factor = (float) (start - min) / delta;
+					Spring scale = Spring.scale(new SpringWidth(this), factor);
+					layout.putConstraint(SpringLayout.WEST, period, scale,
 							SpringLayout.WEST, this);
 				}
 
 				if (period.isBoundedPeriod() || period.isStopMilestone()) {
 					long stop = period.getStop().getTime();
-					int x = (int) ((max - stop) * getWidth() / delta);
-					layout.putConstraint(SpringLayout.EAST, period, -x,
-							SpringLayout.EAST, this);
+					float factor = (float) (stop - min) / delta;
+					Spring scale = Spring.scale(new SpringWidth(this), factor);
+					layout.putConstraint(SpringLayout.EAST, period, scale,
+							SpringLayout.WEST, this);
 				}
 
 				if (period.isMilestone()) {
@@ -137,8 +140,8 @@ public class PeriodCanvas extends JPanel {
 		}
 
 		if (lastDisplayedPeriod != null) {
-			layout.putConstraint(SpringLayout.SOUTH, this, 0, SpringLayout.SOUTH,
-					lastDisplayedPeriod);
+			layout.putConstraint(SpringLayout.SOUTH, this, 0,
+					SpringLayout.SOUTH, lastDisplayedPeriod);
 		}
 		setLayout(layout);
 	}

@@ -19,6 +19,7 @@ import fr.vergne.taskmanager.history.HistorizableDate;
 import fr.vergne.taskmanager.history.HistorizableEnum;
 import fr.vergne.taskmanager.history.HistorizableString;
 import fr.vergne.taskmanager.history.History;
+import fr.vergne.taskmanager.history.History.HistoryEntry;
 
 public class Task implements Exportable {
 	private final HistorizableString title = new HistorizableString("New Task",
@@ -147,6 +148,45 @@ public class Task implements Exportable {
 
 	public TaskStatus getStatus() {
 		return status.get();
+	}
+
+	public Collection<TaskRun> getRunningHistory() {
+		Collection<TaskRun> list = new LinkedList<Task.TaskRun>();
+		History<TaskStatus> history = status.getHistory();
+		Date start = null;
+		for (HistoryEntry<TaskStatus> entry : history) {
+			if (start != null) {
+				list.add(new TaskRun(start, entry.getDate()));
+				start = null;
+			}
+
+			if (entry.getValue() == TaskStatus.RUNNING) {
+				start = entry.getDate();
+			}
+		}
+
+		if (start != null) {
+			list.add(new TaskRun(start, new Date()));
+		}
+		return list;
+	}
+
+	public static class TaskRun {
+		private final Date start;
+		private final Date stop;
+
+		public TaskRun(Date start, Date stop) {
+			this.start = start;
+			this.stop = stop;
+		}
+
+		public Date getStart() {
+			return start;
+		}
+
+		public Date getStop() {
+			return stop;
+		}
 	}
 
 	public void setStatus(TaskStatus status) {

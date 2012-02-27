@@ -3,8 +3,6 @@ package fr.vergne.taskmanager.gui.gantt;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -20,6 +18,7 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Spring;
 import javax.swing.SpringLayout;
 import javax.swing.border.LineBorder;
 
@@ -75,18 +74,25 @@ public class TimeBar extends JPanel {
 		SpringLayout lowLayout = new SpringLayout();
 		setLayout(lowLayout);
 		removeAll();
-		long ref = calendar.getTime().getTime();
 		TimeSlot previousSlot = null;
-		int x = 0;
 		SimpleDateFormat format = new SimpleDateFormat(
 				currentDescriptor.getDateFormat());
-		while (x < getWidth()) {
+		final long min = getMinDate().getTime();
+		final long max = getMaxDate().getTime();
+		final long delta = max - min;
+		float factor = 0;
+		while (factor < 1) {
 			TimeSlot slot = new TimeSlot(format.format(calendar.getTime()));
 			add(slot);
-			x = (int) ((ref - getMinDate().getTime()) * getWidth() / (getMaxDate()
-					.getTime() - getMinDate().getTime()));
-			lowLayout.putConstraint(SpringLayout.WEST, slot, x,
+			long ref = calendar.getTime().getTime();
+			factor = (float) (ref - min) / delta;
+			Spring scale = Spring.scale(new SpringWidth(this), factor);
+			lowLayout.putConstraint(SpringLayout.WEST, slot, scale,
 					SpringLayout.WEST, this);
+			lowLayout.putConstraint(SpringLayout.NORTH, slot, 0,
+					SpringLayout.NORTH, this);
+			lowLayout.putConstraint(SpringLayout.SOUTH, slot, 0,
+					SpringLayout.SOUTH, this);
 
 			if (previousSlot == null) {
 				// do nothing
@@ -95,8 +101,6 @@ public class TimeBar extends JPanel {
 						SpringLayout.WEST, slot);
 			}
 
-			ref += currentDescriptor.getUnitMultiplicator()
-					* currentDescriptor.getUnitStep();
 			calendar.add(currentDescriptor.getCalendarUnit(),
 					currentDescriptor.getUnitStep());
 			slot.revalidate();
@@ -111,10 +115,12 @@ public class TimeBar extends JPanel {
 			for (int unit : calendarUnitsPassed) {
 				calendar.set(unit, calendar.getActualMinimum(unit));
 			}
-			int unitStep = currentDescriptor.getUnitStep();
+			int step = currentDescriptor.getUnitStep();
 			int unit = currentDescriptor.getCalendarUnit();
-			int flooredValue = (int) (unitStep * Math.floor((double) calendar
-					.get(unit) / unitStep));
+			int value = calendar.get(unit);
+			int min = calendar.getMinimum(unit);
+			int flooredValue = (int) (step
+					* Math.floor((double) (value - min) / step) + min);
 			calendar.set(unit, flooredValue);
 		}
 		return calendar;
@@ -187,12 +193,38 @@ public class TimeBar extends JPanel {
 	static class TimeSlot extends JPanel {
 
 		public TimeSlot(String text) {
-			setLayout(new GridBagLayout());
-			GridBagConstraints constraints = new GridBagConstraints();
-			constraints.anchor = GridBagConstraints.LINE_START;
-			add(new JLabel("|"), constraints);
-			constraints.weightx = 1;
-			add(new JLabel(text), constraints);
+			SpringLayout layout = new SpringLayout();
+			setLayout(layout);
+
+			{
+				JPanel cursor = new JPanel();
+				cursor.setBackground(Color.BLACK);
+				add(cursor);
+
+				layout.putConstraint(SpringLayout.WEST, cursor, 0,
+						SpringLayout.WEST, this);
+				layout.putConstraint(SpringLayout.EAST, cursor, 1,
+						SpringLayout.WEST, this);
+				layout.putConstraint(SpringLayout.NORTH, cursor, 0,
+						SpringLayout.NORTH, this);
+				layout.putConstraint(SpringLayout.SOUTH, cursor, 0,
+						SpringLayout.SOUTH, this);
+			}
+
+			{
+				JLabel label = new JLabel(text);
+				label.setVerticalTextPosition(JLabel.CENTER);
+				add(label);
+
+				layout.putConstraint(SpringLayout.WEST, label, 1,
+						SpringLayout.WEST, this);
+				layout.putConstraint(SpringLayout.EAST, label, 0,
+						SpringLayout.EAST, this);
+				layout.putConstraint(SpringLayout.NORTH, label, 0,
+						SpringLayout.NORTH, this);
+				layout.putConstraint(SpringLayout.SOUTH, label, 0,
+						SpringLayout.SOUTH, this);
+			}
 		}
 
 		@Override
