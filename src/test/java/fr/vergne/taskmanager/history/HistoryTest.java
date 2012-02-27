@@ -151,8 +151,8 @@ public class HistoryTest {
 		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
-		history.push(0, new Date(5));
-		history.push(0, new Date(10));
+		history.push(1, new Date(5));
+		history.push(2, new Date(10));
 
 		assertEquals(3, history.size());
 		assertEquals(0, history.getHistorizedDates().get(0).getTime());
@@ -293,8 +293,8 @@ public class HistoryTest {
 		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
-		history.push(0, new Date(5));
-		history.push(0, new Date(10));
+		history.push(1, new Date(5));
+		history.push(2, new Date(10));
 
 		Iterator<Date> iterator = history.datesIterator();
 		assertTrue(iterator.hasNext());
@@ -317,8 +317,8 @@ public class HistoryTest {
 		History<Integer> history = new TestHistory();
 
 		history.push(0, new Date(0));
-		history.push(0, new Date(5));
-		history.push(0, new Date(10));
+		history.push(1, new Date(5));
+		history.push(2, new Date(10));
 
 		Iterator<Date> iterator = history.reversedDatesIterator();
 		assertTrue(iterator.hasNext());
