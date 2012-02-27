@@ -26,6 +26,7 @@ import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.xml.Exporter;
 
+// FIXME manage milestones (single date) and display them in the gantt 
 // TODO manage key shortcut + popup menus at a general level
 @SuppressWarnings("serial")
 public class Gui extends JFrame {
@@ -200,7 +201,7 @@ public class Gui extends JFrame {
 			Calendar calendar = Calendar.getInstance();
 
 			Task task = new Task();
-			task.setCreationDate(calendar.getTime(), true);
+			task.setStart(calendar.getTime());
 			calendar.add(Calendar.MINUTE, 13);
 			task.setDeadline(calendar.getTime());
 			calendar.add(Calendar.MINUTE, -12);
@@ -208,7 +209,7 @@ public class Gui extends JFrame {
 			tasks.add(task);
 
 			task = new Task();
-			task.setCreationDate(calendar.getTime(), true);
+			task.setStart(calendar.getTime());
 			calendar.add(Calendar.MINUTE, 11);
 			task.setDeadline(calendar.getTime());
 			calendar.add(Calendar.MINUTE, -10);
@@ -216,7 +217,7 @@ public class Gui extends JFrame {
 			tasks.add(task);
 
 			task = new Task();
-			task.setCreationDate(calendar.getTime(), true);
+			task.setStart(calendar.getTime());
 			calendar.add(Calendar.MINUTE, 9);
 			task.setDeadline(calendar.getTime());
 			calendar.add(Calendar.MINUTE, -8);
@@ -224,7 +225,7 @@ public class Gui extends JFrame {
 			tasks.add(task);
 
 			task = new Task();
-			task.setCreationDate(calendar.getTime(), true);
+			task.setStart(calendar.getTime());
 			calendar.add(Calendar.MINUTE, 7);
 			task.setDeadline(calendar.getTime());
 			calendar.add(Calendar.MINUTE, -6);
@@ -232,13 +233,13 @@ public class Gui extends JFrame {
 			tasks.add(task);
 
 			task = new Task();
-			task.setCreationDate(calendar.getTime(), true);
+			task.setStart(calendar.getTime());
 			calendar.add(Calendar.MINUTE, 5);
 			task.setDeadline(calendar.getTime());
 			calendar.add(Calendar.MINUTE, -4);
 			tasks.add(task);
 			task.setTitle("Task 5");
-			
+
 			isListModified = true;
 		}
 		return tasks;

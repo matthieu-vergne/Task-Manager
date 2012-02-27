@@ -26,7 +26,7 @@ public class ExporterTest {
 		{
 			Task task = new Task("task 2");
 			task.setDescription("Description task 2.");
-			task.setDeadline(new Date(task.getCreationDate().getTime() + 60000));
+			task.setDeadline(new Date(60000));
 			task.setStatus(TaskStatus.RUNNING);
 			list.add(task);
 		}
@@ -43,6 +43,7 @@ public class ExporterTest {
 			Task task1 = list.get(i);
 			Task task2 = list2.get(i);
 			assertEquals(task1.getTitle(), task2.getTitle());
+			assertEquals(task1.getStart(), task2.getStart());
 			assertEquals(task1.getDeadline(), task2.getDeadline());
 			assertEquals(task1.getDescription(), task2.getDescription());
 			assertEquals(task1.getCreationDate(), task2.getCreationDate());

@@ -82,7 +82,7 @@ public class Period extends JLabel {
 	}
 
 	public Date getStart() {
-		return task.getCreationDate();
+		return task.getStart();
 	}
 
 	public Date getStop() {

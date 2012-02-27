@@ -25,6 +25,7 @@ public class Task implements Exportable {
 			true);
 	private final HistorizableString description = new HistorizableString();
 	private Date creationDate;
+	private final HistorizableDate start = new HistorizableDate();
 	private final HistorizableDate deadline = new HistorizableDate();
 	private final AbstractHistorizable<TaskStatus> status = new HistorizableEnum<TaskStatus>() {
 		@Override
@@ -45,6 +46,7 @@ public class Task implements Exportable {
 
 	public Task() {
 		setCreationDate(new Date(), true);
+		setStart(null);
 		setDeadline(null);
 		setStatus(TaskStatus.SLEEPING);
 	}
@@ -64,6 +66,15 @@ public class Task implements Exportable {
 
 	public void setDescription(String decription) {
 		this.description.set(decription);
+		fireUpdateEvent();
+	}
+
+	public Date getStart() {
+		return start.get();
+	}
+
+	public void setStart(Date start) {
+		this.start.set(start);
 		fireUpdateEvent();
 	}
 
@@ -162,6 +173,10 @@ public class Task implements Exportable {
 		description.getHistory().write(handler);
 		handler.endElement("", "", "description");
 
+		handler.startElement("", "", "start", null);
+		start.getHistory().write(handler);
+		handler.endElement("", "", "start");
+
 		handler.startElement("", "", "deadline", null);
 		deadline.getHistory().write(handler);
 		handler.endElement("", "", "deadline");
@@ -180,14 +195,17 @@ public class Task implements Exportable {
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
 			String tag = child.getNodeName();
+			Node historyNode = child.getFirstChild();
 			if (tag.equals("title")) {
-				title.getHistory().read(children.item(0).getFirstChild());
+				title.getHistory().read(historyNode);
 			} else if (tag.equals("description")) {
-				description.getHistory().read(children.item(1).getFirstChild());
+				description.getHistory().read(historyNode);
+			} else if (tag.equals("start")) {
+				start.getHistory().read(historyNode);
 			} else if (tag.equals("deadline")) {
-				deadline.getHistory().read(children.item(2).getFirstChild());
+				deadline.getHistory().read(historyNode);
 			} else if (tag.equals("status")) {
-				status.getHistory().read(children.item(3).getFirstChild());
+				status.getHistory().read(historyNode);
 			} else {
 				throw new IllegalStateException(tag + " is not a managed tag");
 			}
@@ -198,7 +216,7 @@ public class Task implements Exportable {
 		Date date = new Date(Long.parseLong(time));
 		setCreationDate(date);
 	}
-	
+
 	private final Collection<UpdateListener> updateListeners = new LinkedList<UpdateListener>();
 
 	public void addUpdateListener(UpdateListener listener) {

@@ -137,18 +137,21 @@ public class Todo extends JPanel {
 		public void setValueAt(Object value, int row, int col) {
 			Task task = getTask(row);
 			switch (col) {
-			case 0:
-				task.setTitle((String) value);
-				break;
-			case 1:
-				task.setStatus((TaskStatus) value);
-				break;
-			case 2:
-				task.setDeadline((Date) value);
-				break;
-			default:
-				throw new RuntimeException("The column " + col
-						+ " is not managed");
+				case 0:
+					task.setTitle((String) value);
+					break;
+				case 1:
+					task.setStatus((TaskStatus) value);
+					break;
+				case 2:
+					task.setStart((Date) value);
+					break;
+				case 3:
+					task.setDeadline((Date) value);
+					break;
+				default:
+					throw new RuntimeException("The column " + col
+							+ " is not managed");
 			}
 			for (TableModelListener listener : listeners) {
 				listener.tableChanged(new TableModelEvent(this, row, row, col,
@@ -169,15 +172,17 @@ public class Todo extends JPanel {
 		public Object getValueAt(int row, int col) {
 			Task task = getTask(row);
 			switch (col) {
-			case 0:
-				return task.getTitle();
-			case 1:
-				return task.getStatus();
-			case 2:
-				return task.getDeadline();
-			default:
-				throw new RuntimeException("The column " + col
-						+ " is not managed");
+				case 0:
+					return task.getTitle();
+				case 1:
+					return task.getStatus();
+				case 2:
+					return task.getStart();
+				case 3:
+					return task.getDeadline();
+				default:
+					throw new RuntimeException("The column " + col
+							+ " is not managed");
 			}
 		}
 
@@ -189,35 +194,39 @@ public class Todo extends JPanel {
 		@Override
 		public String getColumnName(int col) {
 			switch (col) {
-			case 0:
-				return "Title";
-			case 1:
-				return "Status";
-			case 2:
-				return "Deadline";
-			default:
-				throw new RuntimeException("The column " + col
-						+ " is not managed");
+				case 0:
+					return "Title";
+				case 1:
+					return "Status";
+				case 2:
+					return "Start";
+				case 3:
+					return "Deadline";
+				default:
+					throw new RuntimeException("The column " + col
+							+ " is not managed");
 			}
 		}
 
 		@Override
 		public int getColumnCount() {
-			return 3;
+			return 4;
 		}
 
 		@Override
 		public Class<?> getColumnClass(int col) {
 			switch (col) {
-			case 0:
-				return String.class;
-			case 1:
-				return TaskStatus.class;
-			case 2:
-				return Date.class;
-			default:
-				throw new RuntimeException("The column " + col
-						+ " is not managed");
+				case 0:
+					return String.class;
+				case 1:
+					return TaskStatus.class;
+				case 2:
+					return Date.class;
+				case 3:
+					return Date.class;
+				default:
+					throw new RuntimeException("The column " + col
+							+ " is not managed");
 			}
 		}
 

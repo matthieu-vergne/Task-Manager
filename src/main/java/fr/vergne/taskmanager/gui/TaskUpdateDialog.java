@@ -31,7 +31,7 @@ public class TaskUpdateDialog extends JDialog {
 	public boolean validated = false;
 	private final Task task;
 	private final JTextField titleEntry = new JTextField();
-	private final JDateField creationEntry = new JDateField();
+	private final JDateField startEntry = new JDateField(true);
 	private final JDateField deadlineEntry = new JDateField(true);
 	private final JComboBox statusEntry = new JComboBox();
 
@@ -46,7 +46,7 @@ public class TaskUpdateDialog extends JDialog {
 		initListeners();
 
 		titleEntry.setText(task.getTitle());
-		creationEntry.setDate(task.getCreationDate());
+		startEntry.setDate(task.getStart());
 		deadlineEntry.setDate(task.getDeadline());
 		statusEntry.setSelectedItem(task.getStatus());
 
@@ -64,10 +64,10 @@ public class TaskUpdateDialog extends JDialog {
 		}
 
 		{
-			JLabel label = new JLabel("Creation:");
+			JLabel label = new JLabel("Start:");
 			label.setLabelFor(titleEntry);
 			add(label);
-			add(creationEntry);
+			add(startEntry);
 		}
 
 		{
@@ -134,14 +134,14 @@ public class TaskUpdateDialog extends JDialog {
 			}
 		};
 		titleEntry.addKeyListener(entryListener);
-		creationEntry.addKeyListener(entryListener);
+		startEntry.addKeyListener(entryListener);
 		deadlineEntry.addKeyListener(entryListener);
 		statusEntry.addKeyListener(entryListener);
 	}
 
 	private void validateEntriesAndDispose() {
 		task.setTitle(titleEntry.getText());
-		task.setCreationDate((Date) creationEntry.getDate());
+		task.setStart((Date) startEntry.getDate());
 		task.setDeadline((Date) deadlineEntry.getDate());
 		task.setStatus((TaskStatus) statusEntry.getSelectedItem());
 		validated = true;
