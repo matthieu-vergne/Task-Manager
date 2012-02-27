@@ -201,33 +201,33 @@ public class Gui extends JFrame {
 
 			Task task = new Task();
 			task.setCreationDate(calendar.getTime(), true);
-			calendar.add(Calendar.MINUTE, 5);
+			calendar.add(Calendar.MINUTE, 13);
 			task.setDeadline(calendar.getTime());
-			calendar.add(Calendar.MINUTE, -4);
+			calendar.add(Calendar.MINUTE, -12);
 			task.setTitle("Task 1");
 			tasks.add(task);
 
 			task = new Task();
 			task.setCreationDate(calendar.getTime(), true);
-			calendar.add(Calendar.MINUTE, 5);
+			calendar.add(Calendar.MINUTE, 11);
 			task.setDeadline(calendar.getTime());
-			calendar.add(Calendar.MINUTE, -4);
+			calendar.add(Calendar.MINUTE, -10);
 			task.setTitle("Task 2");
 			tasks.add(task);
 
 			task = new Task();
 			task.setCreationDate(calendar.getTime(), true);
-			calendar.add(Calendar.MINUTE, 5);
+			calendar.add(Calendar.MINUTE, 9);
 			task.setDeadline(calendar.getTime());
-			calendar.add(Calendar.MINUTE, -4);
+			calendar.add(Calendar.MINUTE, -8);
 			task.setTitle("Task 3");
 			tasks.add(task);
 
 			task = new Task();
 			task.setCreationDate(calendar.getTime(), true);
-			calendar.add(Calendar.MINUTE, 5);
+			calendar.add(Calendar.MINUTE, 7);
 			task.setDeadline(calendar.getTime());
-			calendar.add(Calendar.MINUTE, -4);
+			calendar.add(Calendar.MINUTE, -6);
 			task.setTitle("Task 4");
 			tasks.add(task);
 

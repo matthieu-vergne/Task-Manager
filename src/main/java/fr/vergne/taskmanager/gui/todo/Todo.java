@@ -30,6 +30,7 @@ import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 import fr.vergne.taskmanager.task.TaskStatus;
 
+// TODO add buttons to add/remove/edit/clear
 @SuppressWarnings("serial")
 public class Todo extends JPanel {
 	private final TodoListModel model = new TodoListModel();
