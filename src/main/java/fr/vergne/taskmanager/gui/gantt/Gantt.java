@@ -27,6 +27,8 @@ import fr.vergne.taskmanager.gui.gantt.TimeBar.UnitDescriptor;
 import fr.vergne.taskmanager.task.Task;
 import fr.vergne.taskmanager.task.TaskList;
 
+// TODO manage several default zoom (day, week, month, full, ...)
+// TODO use the day zoom as default
 // TODO add cursor looking for the position of the mouse
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {
