@@ -29,6 +29,7 @@ import fr.vergne.taskmanager.task.TaskList;
 
 // TODO manage several default zoom (day, week, month, full, ...)
 // TODO use the day zoom as default
+// TODO hide tasks which are too small
 // TODO add cursor looking for the position of the mouse
 @SuppressWarnings("serial")
 public class Gantt extends JPanel {

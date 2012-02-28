@@ -21,6 +21,7 @@ import fr.vergne.taskmanager.history.HistorizableString;
 import fr.vergne.taskmanager.history.History;
 import fr.vergne.taskmanager.history.History.HistoryEntry;
 
+// TODO manage repeatable tasks
 public class Task implements Exportable {
 	private final HistorizableString title = new HistorizableString("New Task",
 			true);
